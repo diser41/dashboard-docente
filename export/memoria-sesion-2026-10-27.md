@@ -3,6 +3,7 @@
 - **Fecha:** 27-10-2026
 - **Rol de quien dirige:** Product Owner, con Claude Code (Opus 5.5) como asistente.
 - **Metodología:** Spec-Driven Development (SDD): Constitución → Especificar → Planificar → Tareas → Implementar.
+- **Repositorio público:** https://github.com/diser41/dashboard-docente (sin `inputs/` ni la transcripción).
 - **Transcripción completa:** `transcripcion-sesion-2026-10-27.zip`. No está en el repositorio público, porque incluye el correo de la cuenta y las instrucciones de sistema del asistente; se entrega por separado al evaluador. Es el archivo `transcript.jsonl`, con todos los mensajes, llamadas a herramientas y resultados.
 
 Este documento es un resumen legible para el evaluador. Ante cualquier duda, la fuente es la transcripción.
@@ -54,6 +55,7 @@ Este documento es un resumen legible para el evaluador. Ante cualquier duda, la 
 | 22 | El PO pide mostrar "Requieren atención" como tabla tipo libro de clases | Tabla con ID, nombre, apellido, estado, línea base, notas por evaluación, promedios y motivos; spec v1.1 (HU-04) |
 | 23 | El PO cambia el rótulo "Línea base" por "Diagnóstico" en todo el mock up | Mock up, spec (HU-04, HU-05, HU-20 y glosario), plan y Constitución v5.0.3 actualizados |
 | 24 | El PO pide la fase 3 (T026–T028) | Contraste AA medido en ambos modos (se corrigieron dos colores de barra y el borde de controles), prueba de teclado, lista manual completa, capturas en `docs/capturas/` y documentación cerrada. 76 de 76 casos correctos |
+| 25 | El PO pide publicar el proyecto en el GitHub de Diana | Repositorio público `diser41/dashboard-docente` con README; `inputs/` y la transcripción quedan fuera por `.gitignore` |
 
 ## 3. Decisiones del Product Owner
 

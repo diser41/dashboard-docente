@@ -263,6 +263,7 @@ Se trabajará con **Spec-Driven Development (SDD)**, según el material en `inpu
   - El rótulo "Línea base" pasó a ser "Diagnóstico" (Constitución v5.0.3).
   - La pestaña se puede indicar en la dirección (`#heatmap`), nunca con datos de estudiantes.
   - Nombre y apellido se separan desde el nombre completo de la planilla (la plataforma real los entrega por separado).
+- **Repositorio público:** https://github.com/diser41/dashboard-docente. No incluye `inputs/` ni la transcripción de la sesión.
 - **Siguiente paso:** validar el mock up con docentes.
 
 ## 9. Preguntas abiertas
