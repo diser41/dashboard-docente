@@ -1,0 +1,1844 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard docente · Mock up</title>
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --surface: #ffffff;
+    --text: #1d2330;
+    --text-muted: #5a6475;
+    --border: #d9dde4;
+    --accent: #2457c5;
+    --ok: #1b7a3d;
+    --fail: #b3261e;
+    --accent-soft: #e6edfb;
+    --risk-red-bg: #fde7e5; --risk-red-fg: #8a1c13;
+    --risk-yellow-bg: #fff3cd; --risk-yellow-fg: #6a4a00;
+    --risk-green-bg: #e2f3e7; --risk-green-fg: #17572f;
+    --level-insufficient-bg: #fbe3e1; --level-insufficient-fg: #8a1c13; --level-insufficient-bar: #d0574c;
+    --level-elemental-bg: #fff0c7; --level-elemental-fg: #6a4a00; --level-elemental-bar: #a37400;
+    --level-adequate-bg: #dbf0e1; --level-adequate-fg: #17572f; --level-adequate-bar: #2e8a52;
+    --na-bg: #eceef2; --na-fg: #4d5666;
+    --type-diagnostic: #6b4fbb; --type-formative: #1f7a8c; --type-summative: #c2410c;
+    --bar-track: #e8ebf0; --bar-neutral: #6f86b8;
+    --control-border: #858d9b;
+    --radius: 8px;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14171c;
+      --surface: #1d2129;
+      --text: #e8ebf0;
+      --text-muted: #a3acba;
+      --border: #333a46;
+      --accent: #7aa2ff;
+      --ok: #6fd08f;
+      --fail: #ff8a80;
+      --accent-soft: #23304d;
+      --risk-red-bg: #4a1f1c; --risk-red-fg: #ffb4ab;
+      --risk-yellow-bg: #463a12; --risk-yellow-fg: #ffd97a;
+      --risk-green-bg: #173d26; --risk-green-fg: #8fe0aa;
+      --level-insufficient-bg: #4a1f1c; --level-insufficient-fg: #ffb4ab; --level-insufficient-bar: #e07a70;
+      --level-elemental-bg: #463a12; --level-elemental-fg: #ffd97a; --level-elemental-bar: #e8bd4a;
+      --level-adequate-bg: #173d26; --level-adequate-fg: #8fe0aa; --level-adequate-bar: #5cc184;
+      --na-bg: #2a2f38; --na-fg: #b7bfcc;
+      --type-diagnostic: #b39dff; --type-formative: #5fc3d6; --type-summative: #ff9a5c;
+      --bar-track: #2c323c; --bar-neutral: #8ea6e0;
+      --control-border: #7a8494;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.45; }
+  button, select { font: inherit; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .muted { color: var(--text-muted); }
+  .small { font-size: 0.8rem; }
+
+  /* Encabezado y pestañas */
+  .app-header {
+    display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: center; justify-content: space-between;
+    padding: 14px 24px; background: var(--surface); border-bottom: 1px solid var(--border);
+  }
+  .app-header h1 { margin: 0; font-size: 1.25rem; }
+  .app-header .context { color: var(--text-muted); font-size: 0.9rem; }
+  .title { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
+  .controls { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+  .controls label { display: flex; gap: 6px; align-items: center; color: var(--text-muted); font-size: 0.9rem; }
+  select { padding: 4px 8px; border: 1px solid var(--control-border); border-radius: 6px; background: var(--surface); color: var(--text); }
+  .tabs { display: flex; gap: 4px; padding: 0 24px; background: var(--surface); border-bottom: 1px solid var(--border); overflow-x: auto; }
+  .tabs [role="tab"] {
+    border: 0; background: none; color: var(--text-muted); padding: 12px 14px; cursor: pointer;
+    border-bottom: 3px solid transparent; white-space: nowrap;
+  }
+  .tabs [role="tab"][aria-selected="true"] { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
+  main { max-width: 1320px; margin: 0 auto; padding: 24px; }
+  #tab-panel { display: flex; flex-direction: column; gap: 20px; }
+
+  /* Bloques */
+  .notice {
+    margin: 0; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 12px 16px;
+  }
+  .notice-info { border-left: 4px solid var(--accent); }
+  .notice-alert { border-left: 4px solid var(--risk-red-fg); background: var(--risk-red-bg); color: var(--risk-red-fg); font-weight: 600; }
+  .notice-preview { border-left: 4px solid var(--type-diagnostic); }
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; min-width: 0; }
+  .panel h2 { margin: 0 0 12px; font-size: 1.05rem; }
+  .panel > p:first-of-type { margin-top: 0; }
+  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+  .card {
+    display: flex; flex-direction: column; gap: 4px; text-align: left; color: inherit;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px;
+  }
+  button.card { cursor: pointer; }
+  button.card:hover { border-color: var(--accent); }
+  .card-label { color: var(--text-muted); font-size: 0.85rem; }
+  .card-value { font-size: 1.6rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .card-detail { color: var(--text-muted); font-size: 0.85rem; }
+  .cards-compact { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+  .cards-compact .card-value { font-size: 1.25rem; }
+  .risk-counts { display: flex; flex-direction: column; gap: 2px; font-size: 1rem; }
+  .eval-title h2 { margin: 0; font-size: 1.15rem; }
+  .eval-title p { margin: 4px 0 0; }
+
+  /* Etiquetas, chips y botones */
+  .risk {
+    display: inline-flex; gap: 4px; align-items: center; padding: 2px 8px; border-radius: 999px;
+    font-size: 0.85rem; font-weight: 600; white-space: nowrap;
+  }
+  .risk-red { background: var(--risk-red-bg); color: var(--risk-red-fg); }
+  .risk-yellow { background: var(--risk-yellow-bg); color: var(--risk-yellow-fg); }
+  .risk-green { background: var(--risk-green-bg); color: var(--risk-green-fg); }
+  .tag {
+    display: inline-block; margin-left: 6px; padding: 0 6px; border: 1px solid currentColor; border-radius: 4px;
+    font-size: 0.75rem; font-weight: 600; vertical-align: middle;
+  }
+  .tag-pie { color: var(--text-muted); }
+  .tag-skill { color: var(--type-diagnostic); }
+  .tag-type { margin-left: 0; }
+  .tag-preview { color: var(--type-diagnostic); }
+  .tag-critical { color: var(--risk-red-fg); background: var(--risk-red-bg); margin-left: 0; }
+  .type-diagnostic { color: var(--type-diagnostic); }
+  .type-formative { color: var(--type-formative); }
+  .type-summative { color: var(--type-summative); }
+  .level-insufficient { background: var(--level-insufficient-bg); color: var(--level-insufficient-fg); }
+  .level-elemental { background: var(--level-elemental-bg); color: var(--level-elemental-fg); }
+  .level-adequate { background: var(--level-adequate-bg); color: var(--level-adequate-fg); }
+  .link {
+    background: none; border: 0; padding: 0; color: var(--accent); cursor: pointer; text-align: left;
+    text-decoration: underline; text-underline-offset: 2px;
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    border: 1px solid var(--control-border); background: var(--surface); color: var(--text); border-radius: 999px;
+    padding: 4px 12px; cursor: pointer;
+  }
+  .chip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); font-weight: 600; }
+  .secondary {
+    border: 1px solid var(--control-border); background: var(--surface); color: var(--text); border-radius: 6px;
+    padding: 4px 10px; cursor: pointer;
+  }
+  .secondary:disabled { opacity: 0.5; cursor: default; }
+  .toolbar { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; align-items: center; }
+
+  /* Tablas */
+  .table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+  table.data { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  table.data th, table.data td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+  table.data thead th { color: var(--text-muted); font-weight: 600; background: var(--surface); }
+  table.data .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .reasons { margin: 0; padding-left: 18px; }
+  /* Libro de clases */
+  table.gradebook th, table.gradebook td { vertical-align: middle; }
+  table.gradebook tbody tr:nth-child(even) { background: var(--bg); }
+  table.gradebook td.num { width: 1%; white-space: nowrap; }
+  table.gradebook th.num { width: 1%; min-width: 58px; white-space: normal; }
+  table.gradebook td:nth-child(2) { white-space: nowrap; }
+  table.gradebook td:last-child { min-width: 260px; }
+  .col-sub { display: block; font-size: 0.75rem; font-weight: 400; color: var(--text-muted); }
+  .strong { font-weight: 700; }
+  .grade-fail { color: var(--fail); font-weight: 700; }
+  .grade-absent { color: var(--na-fg); font-style: italic; }
+
+  /* Mapa de calor */
+  table.heatmap td.heat { text-align: center; min-width: 120px; font-size: 0.8rem; vertical-align: middle; }
+  .heat-value { display: block; font-weight: 700; font-size: 0.9rem; }
+  .heat-label { display: block; }
+  .heat-absent { background: var(--na-bg); color: var(--na-fg); font-style: italic; }
+  .heat-na { background: var(--na-bg); color: var(--na-fg); }
+  .heat-never {
+    background: repeating-linear-gradient(45deg, var(--na-bg), var(--na-bg) 6px, transparent 6px, transparent 12px);
+    color: var(--na-fg); font-weight: 600;
+  }
+  table.heatmap .course-row th, table.heatmap .course-row td { border-top: 2px solid var(--text-muted); font-weight: 600; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.8rem; }
+  .legend-item { padding: 3px 8px; border-radius: 4px; }
+
+  /* Barras */
+  .bar-row { display: grid; grid-template-columns: minmax(80px, 1fr) auto; gap: 8px; align-items: center; }
+  .distribution { display: flex; flex-direction: column; gap: 8px; }
+  .distribution .bar-row { grid-template-columns: 70px 1fr 110px; }
+  .bar { height: 12px; background: var(--bar-track); border-radius: 6px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 6px; }
+  .bar-fill.level-insufficient { background: var(--level-insufficient-bar); }
+  .bar-fill.level-elemental { background: var(--level-elemental-bar); }
+  .bar-fill.level-adequate { background: var(--level-adequate-bar); }
+  .bar-fill.bar-neutral { background: var(--bar-neutral); }
+  .bar-value { font-size: 0.85rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .objective-bar { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+  .compare { display: grid; grid-template-columns: 120px 1fr; gap: 4px 12px; align-items: center; font-size: 0.85rem; }
+
+  /* Avance curricular */
+  .objectives { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+  .objective { border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; }
+  .objective-head {
+    display: grid; grid-template-columns: 130px 110px minmax(120px, 1fr) minmax(200px, 1.3fr) auto;
+    gap: 12px; align-items: center;
+  }
+  .objective-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+  .objective-detail { margin-top: 10px; font-size: 0.9rem; }
+  .objective-detail ul { padding-left: 18px; }
+  .coverage { font-weight: 600; font-size: 0.85rem; padding: 2px 8px; border-radius: 999px; white-space: nowrap; justify-self: start; }
+  .coverage-covered { background: var(--level-adequate-bg); color: var(--level-adequate-fg); }
+  .coverage-worked { background: var(--level-elemental-bg); color: var(--level-elemental-fg); }
+  .coverage-notEvaluated { background: var(--na-bg); color: var(--na-fg); }
+
+  /* Gráficos SVG */
+  svg.chart { width: 100%; height: auto; display: block; }
+  svg.chart text { fill: var(--text-muted); font-size: 12px; font-family: inherit; }
+  svg.chart .label-strong { fill: var(--text); font-weight: 600; }
+  svg.chart .axis { stroke: var(--text-muted); stroke-width: 1.5; }
+  svg.chart .tick, svg.chart .gridline { stroke: var(--border); }
+  svg.chart .close-line { stroke: var(--text); stroke-dasharray: 4 4; }
+  svg.chart .today-line { stroke: var(--accent); stroke-width: 2; }
+  svg.chart .marker-diagnostic { fill: var(--type-diagnostic); }
+  svg.chart .marker-formative { fill: var(--type-formative); }
+  svg.chart .marker-summative { fill: var(--type-summative); }
+  svg.chart .line { fill: none; stroke: var(--accent); stroke-width: 2; }
+  svg.chart .point { fill: var(--surface); stroke: var(--accent); stroke-width: 2; }
+  svg.chart .threshold { stroke: var(--level-insufficient-bar); stroke-dasharray: 5 4; }
+  .type-legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.85rem; margin-top: 8px; }
+
+  /* Ficha y diálogos */
+  dialog { border: 0; padding: 0; background: var(--surface); color: var(--text); box-shadow: 0 10px 40px rgb(0 0 0 / 0.3); }
+  dialog::backdrop { background: rgb(15 20 30 / 0.45); }
+  dialog.drawer[open] {
+    position: fixed; inset: 0 0 0 auto; margin: 0; width: min(780px, 100vw); height: 100%; max-height: none; overflow-y: auto;
+  }
+  dialog.modal[open] { width: min(560px, calc(100vw - 32px)); border-radius: var(--radius); }
+  .dialog-body { padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; }
+  .dialog-body h3 { margin: 0 0 8px; font-size: 1rem; }
+  .drawer-head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+  .drawer-head h2 { margin: 0; }
+  .drawer-head p { margin: 4px 0 0; }
+  .activities { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 10px; }
+
+  /* Mi semana */
+  .week-nav { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .week-nav h2 { margin: 0; font-size: 1.05rem; }
+  .week { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+  .day {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px;
+    min-height: 150px; display: flex; flex-direction: column; gap: 8px;
+  }
+  .day.today { border-color: var(--accent); box-shadow: inset 0 3px 0 var(--accent); }
+  .day h3 { margin: 0; font-size: 0.9rem; }
+  .event {
+    border-left: 4px solid var(--border); padding: 6px 8px; background: var(--bg); border-radius: 4px;
+    font-size: 0.85rem; display: flex; flex-direction: column; gap: 2px;
+  }
+  .event-diagnostic { border-left-color: var(--type-diagnostic); }
+  .event-formative { border-left-color: var(--type-formative); }
+  .event-summative { border-left-color: var(--type-summative); }
+  .close-marker {
+    background: var(--risk-red-bg); color: var(--risk-red-fg); font-weight: 600; font-size: 0.8rem;
+    padding: 4px 6px; border-radius: 4px;
+  }
+
+  @media (max-width: 900px) {
+    .objective-head { grid-template-columns: 1fr 1fr; }
+    .objective-actions { justify-content: flex-start; }
+  }
+  @media (max-width: 800px) {
+    main { padding: 16px; }
+    .app-header { padding: 12px 16px; }
+    .tabs { padding: 0 16px; }
+    .week { grid-template-columns: 1fr; }
+    .day { min-height: 0; }
+  }
+  .checks { margin-top: 24px; }
+  .checks h2 { font-size: 1.1rem; margin: 0 0 4px; }
+  .checks .summary { margin: 0 0 16px; font-weight: 600; }
+  .checks .summary.ok { color: var(--ok); }
+  .checks .summary.fail { color: var(--fail); }
+  .checks table { width: 100%; border-collapse: collapse; background: var(--surface); font-size: 0.9rem; }
+  .checks th, .checks td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .checks th { color: var(--text-muted); font-weight: 600; }
+  .checks .group td { background: var(--bg); font-weight: 600; padding-top: 14px; }
+  .checks .result-ok { color: var(--ok); }
+  .checks .result-fail { color: var(--fail); font-weight: 600; }
+  .checks code { font-size: 0.85em; word-break: break-word; }
+</style>
+</head>
+<body>
+<header class="app-header">
+  <div class="title">
+    <h1>Dashboard docente</h1>
+    <span class="context">Mock up con datos ficticios</span>
+  </div>
+  <div class="controls">
+    <label>Curso <select id="course-select"></select></label>
+    <label>Semestre
+      <select id="semester-select">
+        <option value="1">1° semestre</option>
+        <option value="2">2° semestre</option>
+      </select>
+    </label>
+    <span class="context" id="reference-date"></span>
+  </div>
+</header>
+<nav class="tabs" id="tabs" role="tablist" aria-label="Secciones del dashboard"></nav>
+<main id="app">
+  <div id="tab-panel" role="tabpanel">
+    <p class="notice">Cargando datos…</p>
+  </div>
+</main>
+<dialog id="student-dialog" class="drawer" aria-labelledby="student-dialog-title"></dialog>
+<dialog id="preview-dialog" class="modal" aria-labelledby="preview-dialog-title"></dialog>
+
+<!-- Datos FICTICIOS generados por mockup/scripts/extract-data.ps1. No editar a mano. -->
+<!-- DATA:BEGIN -->
+<script type="application/json" id="mockup-data">{"meta":{"course":"1° Medio A","subject":"Química","year":2026,"note":"Datos FICTICIOS para el mock up. Generado por mockup/scripts/extract-data.ps1; no editar a mano.","source":"data/Base_Evaluaciones_1MA_Quimica_2026.xlsx y data/OA_Quimica_1M_MINEDUC.csv","seed":2026},"students":[{"id":"E01","name":"Ignacia Aravena","pie":false},{"id":"E02","name":"Sebastián Lagos","pie":false},{"id":"E03","name":"Constanza Ortiz","pie":false},{"id":"E04","name":"Franco Valenzuela","pie":false},{"id":"E05","name":"Paula Zúñiga","pie":false},{"id":"E06","name":"Ignacio Medina","pie":true},{"id":"E07","name":"Fernanda Jara","pie":false},{"id":"E08","name":"Rodrigo Salazar","pie":false},{"id":"E09","name":"Camila Toro","pie":false},{"id":"E10","name":"Andrés Peña","pie":false},{"id":"E11","name":"Daniela Miranda","pie":false},{"id":"E12","name":"Pablo Garrido","pie":false},{"id":"E13","name":"Francisca Ruiz","pie":false},{"id":"E14","name":"Juan Pablo Leiva","pie":true},{"id":"E15","name":"Macarena Salinas","pie":false},{"id":"E16","name":"Esteban Gallardo","pie":false},{"id":"E17","name":"Antonella Rivera","pie":false},{"id":"E18","name":"Hugo Cáceres","pie":false},{"id":"E19","name":"Belén Henríquez","pie":false},{"id":"E20","name":"Simón Orellana","pie":false},{"id":"E21","name":"Rocío Molina","pie":true},{"id":"E22","name":"Felipe Aguilera","pie":false},{"id":"E23","name":"Victoria Escobar","pie":false},{"id":"E24","name":"Gabriel Fuenzalida","pie":false},{"id":"E25","name":"Montserrat Ibarra","pie":false},{"id":"E26","name":"Lucas Sanhueza","pie":false},{"id":"E27","name":"Pía Valdés","pie":false},{"id":"E28","name":"Benjamín Ramírez","pie":true},{"id":"E29","name":"Krishna Poblete","pie":false},{"id":"E30","name":"Mateo Cortés","pie":false},{"id":"E31","name":"Abril Vidal","pie":false},{"id":"E32","name":"Tomás Ulloa","pie":false},{"id":"E33","name":"Laura Osorio","pie":true},{"id":"E34","name":"Diego Pino","pie":false},{"id":"E35","name":"Agustina Moya","pie":false}],"objectives":[{"code":"CN1M OA 17","kind":"knowledge","text":"Investigar experimentalmente y explicar, usando evidencias, que la fermentación, la combustión provocada por un motor y un calefactor, y la oxidación de metales, entre otras, son reacciones químicas presentes en la vida diaria, considerando: la producción de gas, la formación de precipitados, el cambio de temperatura, color y olor, y la emisión de luz, entre otros; la influencia de la cantidad de sustancia, la temperatura, el volumen y la presión en ellas; su representación simbólica en ecuaciones químicas; su impacto en los seres vivos y el entorno."},{"code":"CN1M OA 18","kind":"knowledge","text":"Desarrollar un modelo que describa cómo el número total de átomos no varía en una reacción química y cómo la masa se conserva aplicando la ley de la conservación de la materia."},{"code":"CN1M OA 19","kind":"knowledge","text":"Explicar la formación de compuestos binarios y ternarios, considerando las fuerzas eléctricas entre partículas y la nomenclatura inorgánica correspondiente."},{"code":"CN1M OA 20","kind":"knowledge","text":"Establecer relaciones cuantitativas entre reactantes y productos en reacciones químicas (estequiometría) y explicar la formación de compuestos útiles para los seres vivos, como la formación de la glucosa en la fotosíntesis."},{"code":"CN1M OAH d, f","kind":"skill","text":"CN1M OAH d: Planificar diversos diseños de investigaciones experimentales que den respuesta a una pregunta y/o problema sobre la base de diversas fuentes de información científica, considerando: el uso adecuado de instrumentos y materiales para asegurar la obtención de datos confiables; la manipulación de variables y sus relaciones; la explicación clara de procedimientos posibles de replicar. CN1M OAH f: Conducir rigurosamente investigaciones científicas para obtener evidencias precisas y confiables con el apoyo de las TIC."}],"evaluations":[{"id":"D1","type":"diagnostic","name":"Prueba diagnóstica inicial","instrument":"Prueba escrita","date":"2026-03-12","weight":null,"objectives":[{"code":"CN1M OA 17","maxScore":8},{"code":"CN1M OA 18","maxScore":8},{"code":"CN1M OA 20","maxScore":16},{"code":"CN1M OAH d, f","maxScore":8}]},{"id":"F1","type":"formative","name":"Ticket de salida: reacciones en la vida diaria","instrument":"Ticket de salida","date":"2026-04-09","weight":null,"objectives":[{"code":"CN1M OA 17","maxScore":10}]},{"id":"F2","type":"formative","name":"Quiz: balance de ecuaciones","instrument":"Quiz en plataforma","date":"2026-04-23","weight":null,"objectives":[{"code":"CN1M OA 18","maxScore":10}]},{"id":"S1","type":"summative","name":"Prueba Unidad 1: reacciones químicas","instrument":"Prueba escrita","date":"2026-05-07","weight":35,"objectives":[{"code":"CN1M OA 17","maxScore":20},{"code":"CN1M OA 18","maxScore":20}]},{"id":"F3","type":"formative","name":"Ticket de salida: el mol","instrument":"Ticket de salida","date":"2026-06-11","weight":null,"objectives":[{"code":"CN1M OA 20","maxScore":10}]},{"id":"S2","type":"summative","name":"Prueba Unidad 2: cantidad de sustancia","instrument":"Prueba escrita","date":"2026-07-02","weight":30,"objectives":[{"code":"CN1M OA 20","maxScore":20}]},{"id":"F4","type":"formative","name":"Quiz: cálculos estequiométricos","instrument":"Quiz en plataforma","date":"2026-08-27","weight":null,"objectives":[{"code":"CN1M OA 20","maxScore":10}]},{"id":"F5","type":"formative","name":"Pauta de laboratorio: reacción y masa","instrument":"Pauta de observación","date":"2026-09-17","weight":null,"objectives":[{"code":"CN1M OAH d, f","maxScore":10}]},{"id":"S3","type":"summative","name":"Prueba Unidad 3 + informe de laboratorio","instrument":"Prueba e informe","date":"2026-10-01","weight":35,"objectives":[{"code":"CN1M OA 20","maxScore":20},{"code":"CN1M OAH d, f","maxScore":20}]}],"results":[{"studentId":"E01","evaluationId":"D1","objective":"CN1M OA 17","score":4,"maxScore":8,"absent":false},{"studentId":"E01","evaluationId":"D1","objective":"CN1M OA 18","score":4,"maxScore":8,"absent":false},{"studentId":"E01","evaluationId":"D1","objective":"CN1M OA 20","score":7,"maxScore":16,"absent":false},{"studentId":"E01","evaluationId":"D1","objective":"CN1M OAH d, f","score":4,"maxScore":8,"absent":false},{"studentId":"E02","evaluationId":"D1","objective":"CN1M OA 17","score":5,"maxScore":8,"absent":false},{"studentId":"E02","evaluationId":"D1","objective":"CN1M OA 18","score":4,"maxScore":8,"absent":false},{"studentId":"E02","evaluationId":"D1","objective":"CN1M OA 20","score":7,"maxScore":16,"absent":false},{"studentId":"E02","evaluationId":"D1","objective":"CN1M OAH d, f","score":4,"maxScore":8,"absent":false},{"studentId":"E03","evaluationId":"D1","objective":"CN1M OA 17","score":7,"maxScore":8,"absent":false},{"studentId":"E03","evaluationId":"D1","objective":"CN1M OA 18","score":6,"maxScore":8,"absent":false},{"studentId":"E03","evaluationId":"D1","objective":"CN1M OA 20","score":11,"maxScore":16,"absent":false},{"studentId":"E03","evaluationId":"D1","objective":"CN1M OAH d, f","score":6,"maxScore":8,"absent":false},{"studentId":"E04","evaluationId":"D1","objective":"CN1M OA 17","score":5,"maxScore":8,"absent":false},{"studentId":"E04","evaluationId":"D1","objective":"CN1M OA 18","score":6,"maxScore":8,"absent":false},{"studentId":"E04","evaluationId":"D1","objective":"CN1M OA 20","score":7,"maxScore":16,"absent":false},{"studentId":"E04","evaluationId":"D1","objective":"CN1M OAH d, f","score":5,"maxScore":8,"absent":false},{"studentId":"E05","evaluationId":"D1","objective":"CN1M OA 17","score":4,"maxScore":8,"absent":false},{"studentId":"E05","evaluationId":"D1","objective":"CN1M OA 18","score":3,"maxScore":8,"absent":false},{"studentId":"E05","evaluationId":"D1","objective":"CN1M OA 20","score":4,"maxScore":16,"absent":false},{"studentId":"E05","evaluationId":"D1","objective":"CN1M OAH d, f","score":4,"maxScore":8,"absent":false},{"studentId":"E06","evaluationId":"D1","objective":"CN1M OA 17","score":5,"maxScore":8,"absent":false},{"studentId":"E06","evaluationId":"D1","objective":"CN1M OA 18","score":5,"maxScore":8,"absent":false},{"studentId":"E06","evaluationId":"D1","objective":"CN1M OA 20","score":6,"maxScore":16,"absent":false},{"studentId":"E06","evaluationId":"D1","objective":"CN1M OAH d, f","score":5,"maxScore":8,"absent":false},{"studentId":"E07","evaluationId":"D1","objective":"CN1M OA 17","score":4,"maxScore":8,"absent":false},{"studentId":"E07","evaluationId":"D1","objective":"CN1M OA 18","score":3,"maxScore":8,"absent":false},{"studentId":"E07","evaluationId":"D1","objective":"CN1M OA 20","score":5,"maxScore":16,"absent":false},{"studentId":"E07","evaluationId":"D1","objective":"CN1M OAH d, f","score":4,"maxScore":8,"absent":false},{"studentId":"E08","evaluationId":"D1","objective":"CN1M OA 17","score":5,"maxScore":8,"absent":false},{"studentId":"E08","evaluationId":"D1","objective":"CN1M OA 18","score":6,"maxScore":8,"absent":false},{"studentId":"E08","evaluationId":"D1","objective":"CN1M OA 20","score":8,"maxScore":16,"absent":false},{"studentId":"E08","evaluationId":"D1","objective":"CN1M OAH d, f","score":4,"maxScore":8,"absent":false},{"studentId":"E09","evaluationId":"D1","objective":"CN1M OA 17","score":5,"maxScore":8,"absent":false},{"studentId":"E09","evaluationId":"D1","objective":"CN1M OA 18","score":5,"maxScore":8,"absent":false},{"studentId":"E09","evaluationId":"D1","objective":"CN1M OA 20","score":8,"maxScore":16,"absent":false},{"studentId":"E09","evaluationId":"D1","objective":"CN1M OAH d, f","score":6,"maxScore":8,"absent":false},{"studentId":"E10","evaluationId":"D1","objective":"CN1M OA 17","score":6,"maxScore":8,"absent":false},{"studentId":"E10","evaluationId":"D1","objective":"CN1M OA 18","score":6,"maxScore":8,"absent":false},{"studentId":"E10","evaluationId":"D1","objective":"CN1M OA 20","score":11,"maxScore":16,"absent":false},{"studentId":"E10","evaluationId":"D1","objective":"CN1M OAH d, f","score":7,"maxScore":8,"absent":false},{"studentId":"E11","evaluationId":"D1","objective":"CN1M OA 17","score":5,"maxScore":8,"absent":false},{"studentId":"E11","evaluationId":"D1","objective":"CN1M OA 18","score":4,"maxScore":8,"absent":false},{"studentId":"E11","evaluationId":"D1","objective":"CN1M OA 20","score":7,"maxScore":16,"absent":false},{"studentId":"E11","evaluationId":"D1","objective":"CN1M OAH d, f","score":5,"maxScore":8,"absent":false},{"studentId":"E12","evaluationId":"D1","objective":"CN1M OA 17","score":5,"maxScore":8,"absent":false},{"studentId":"E12","evaluationId":"D1","objective":"CN1M OA 18","score":5,"maxScore":8,"absent":false},{"studentId":"E12","evaluationId":"D1","objective":"CN1M OA 20","score":8,"maxScore":16,"absent":false},{"studentId":"E12","evaluationId":"D1","objective":"CN1M OAH d, f","score":5,"maxScore":8,"absent":false},{"studentId":"E13","evaluationId":"D1","objective":"CN1M OA 17","score":5,"maxScore":8,"absent":false},{"studentId":"E13","evaluationId":"D1","objective":"CN1M OA 18","score":4,"maxScore":8,"absent":false},{"studentId":"E13","evaluationId":"D1","objective":"CN1M OA 20","score":8,"maxScore":16,"absent":false},{"studentId":"E13","evaluationId":"D1","objective":"CN1M OAH d, f","score":5,"maxScore":8,"absent":false},{"studentId":"E14","evaluationId":"D1","objective":"CN1M OA 17","score":6,"maxScore":8,"absent":false},{"studentId":"E14","evaluationId":"D1","objective":"CN1M OA 18","score":5,"maxScore":8,"absent":false},{"studentId":"E14","evaluationId":"D1","objective":"CN1M OA 20","score":8,"maxScore":16,"absent":false},{"studentId":"E14","evaluationId":"D1","objective":"CN1M OAH d, f","score":5,"maxScore":8,"absent":false},{"studentId":"E15","evaluationId":"D1","objective":"CN1M OA 17","score":5,"maxScore":8,"absent":false},{"studentId":"E15","evaluationId":"D1","objective":"CN1M OA 18","score":4,"maxScore":8,"absent":false},{"studentId":"E15","evaluationId":"D1","objective":"CN1M OA 20","score":10,"maxScore":16,"absent":false},{"studentId":"E15","evaluationId":"D1","objective":"CN1M OAH d, f","score":6,"maxScore":8,"absent":false},{"studentId":"E16","evaluationId":"D1","objective":"CN1M OA 17","score":7,"maxScore":8,"absent":false},{"studentId":"E16","evaluationId":"D1","objective":"CN1M OA 18","score":6,"maxScore":8,"absent":false},{"studentId":"E16","evaluationId":"D1","objective":"CN1M OA 20","score":11,"maxScore":16,"absent":false},{"studentId":"E16","evaluationId":"D1","objective":"CN1M OAH d, f","score":7,"maxScore":8,"absent":false},{"studentId":"E17","evaluationId":"D1","objective":"CN1M OA 17","score":6,"maxScore":8,"absent":false},{"studentId":"E17","evaluationId":"D1","objective":"CN1M OA 18","score":4,"maxScore":8,"absent":false},{"studentId":"E17","evaluationId":"D1","objective":"CN1M OA 20","score":9,"maxScore":16,"absent":false},{"studentId":"E17","evaluationId":"D1","objective":"CN1M OAH d, f","score":5,"maxScore":8,"absent":false},{"studentId":"E18","evaluationId":"D1","objective":"CN1M OA 17","score":6,"maxScore":8,"absent":false},{"studentId":"E18","evaluationId":"D1","objective":"CN1M OA 18","score":5,"maxScore":8,"absent":false},{"studentId":"E18","evaluationId":"D1","objective":"CN1M OA 20","score":8,"maxScore":16,"absent":false},{"studentId":"E18","evaluationId":"D1","objective":"CN1M OAH d, f","score":6,"maxScore":8,"absent":false},{"studentId":"E19","evaluationId":"D1","objective":"CN1M OA 17","score":6,"maxScore":8,"absent":false},{"studentId":"E19","evaluationId":"D1","objective":"CN1M OA 18","score":5,"maxScore":8,"absent":false},{"studentId":"E19","evaluationId":"D1","objective":"CN1M OA 20","score":9,"maxScore":16,"absent":false},{"studentId":"E19","evaluationId":"D1","objective":"CN1M OAH d, f","score":6,"maxScore":8,"absent":false},{"studentId":"E20","evaluationId":"D1","objective":"CN1M OA 17","score":6,"maxScore":8,"absent":false},{"studentId":"E20","evaluationId":"D1","objective":"CN1M OA 18","score":5,"maxScore":8,"absent":false},{"studentId":"E20","evaluationId":"D1","objective":"CN1M OA 20","score":9,"maxScore":16,"absent":false},{"studentId":"E20","evaluationId":"D1","objective":"CN1M OAH d, f","score":7,"maxScore":8,"absent":false},{"studentId":"E21","evaluationId":"D1","objective":"CN1M OA 17","score":4,"maxScore":8,"absent":false},{"studentId":"E21","evaluationId":"D1","objective":"CN1M OA 18","score":4,"maxScore":8,"absent":false},{"studentId":"E21","evaluationId":"D1","objective":"CN1M OA 20","score":7,"maxScore":16,"absent":false},{"studentId":"E21","evaluationId":"D1","objective":"CN1M OAH d, f","score":4,"maxScore":8,"absent":false},{"studentId":"E22","evaluationId":"D1","objective":"CN1M OA 17","score":4,"maxScore":8,"absent":false},{"studentId":"E22","evaluationId":"D1","objective":"CN1M OA 18","score":3,"maxScore":8,"absent":false},{"studentId":"E22","evaluationId":"D1","objective":"CN1M OA 20","score":7,"maxScore":16,"absent":false},{"studentId":"E22","evaluationId":"D1","objective":"CN1M OAH d, f","score":4,"maxScore":8,"absent":false},{"studentId":"E23","evaluationId":"D1","objective":"CN1M OA 17","score":6,"maxScore":8,"absent":false},{"studentId":"E23","evaluationId":"D1","objective":"CN1M OA 18","score":6,"maxScore":8,"absent":false},{"studentId":"E23","evaluationId":"D1","objective":"CN1M OA 20","score":8,"maxScore":16,"absent":false},{"studentId":"E23","evaluationId":"D1","objective":"CN1M OAH d, f","score":7,"maxScore":8,"absent":false},{"studentId":"E24","evaluationId":"D1","objective":"CN1M OA 17","score":7,"maxScore":8,"absent":false},{"studentId":"E24","evaluationId":"D1","objective":"CN1M OA 18","score":5,"maxScore":8,"absent":false},{"studentId":"E24","evaluationId":"D1","objective":"CN1M OA 20","score":8,"maxScore":16,"absent":false},{"studentId":"E24","evaluationId":"D1","objective":"CN1M OAH d, f","score":6,"maxScore":8,"absent":false},{"studentId":"E25","evaluationId":"D1","objective":"CN1M OA 17","score":5,"maxScore":8,"absent":false},{"studentId":"E25","evaluationId":"D1","objective":"CN1M OA 18","score":3,"maxScore":8,"absent":false},{"studentId":"E25","evaluationId":"D1","objective":"CN1M OA 20","score":5,"maxScore":16,"absent":false},{"studentId":"E25","evaluationId":"D1","objective":"CN1M OAH d, f","score":4,"maxScore":8,"absent":false},{"studentId":"E26","evaluationId":"D1","objective":"CN1M OA 17","score":6,"maxScore":8,"absent":false},{"studentId":"E26","evaluationId":"D1","objective":"CN1M OA 18","score":3,"maxScore":8,"absent":false},{"studentId":"E26","evaluationId":"D1","objective":"CN1M OA 20","score":7,"maxScore":16,"absent":false},{"studentId":"E26","evaluationId":"D1","objective":"CN1M OAH d, f","score":6,"maxScore":8,"absent":false},{"studentId":"E27","evaluationId":"D1","objective":"CN1M OA 17","score":7,"maxScore":8,"absent":false},{"studentId":"E27","evaluationId":"D1","objective":"CN1M OA 18","score":6,"maxScore":8,"absent":false},{"studentId":"E27","evaluationId":"D1","objective":"CN1M OA 20","score":8,"maxScore":16,"absent":false},{"studentId":"E27","evaluationId":"D1","objective":"CN1M OAH d, f","score":6,"maxScore":8,"absent":false},{"studentId":"E28","evaluationId":"D1","objective":"CN1M OA 17","score":4,"maxScore":8,"absent":false},{"studentId":"E28","evaluationId":"D1","objective":"CN1M OA 18","score":4,"maxScore":8,"absent":false},{"studentId":"E28","evaluationId":"D1","objective":"CN1M OA 20","score":7,"maxScore":16,"absent":false},{"studentId":"E28","evaluationId":"D1","objective":"CN1M OAH d, f","score":5,"maxScore":8,"absent":false},{"studentId":"E29","evaluationId":"D1","objective":"CN1M OA 17","score":5,"maxScore":8,"absent":false},{"studentId":"E29","evaluationId":"D1","objective":"CN1M OA 18","score":5,"maxScore":8,"absent":false},{"studentId":"E29","evaluationId":"D1","objective":"CN1M OA 20","score":10,"maxScore":16,"absent":false},{"studentId":"E29","evaluationId":"D1","objective":"CN1M OAH d, f","score":5,"maxScore":8,"absent":false},{"studentId":"E30","evaluationId":"D1","objective":"CN1M OA 17","score":6,"maxScore":8,"absent":false},{"studentId":"E30","evaluationId":"D1","objective":"CN1M OA 18","score":5,"maxScore":8,"absent":false},{"studentId":"E30","evaluationId":"D1","objective":"CN1M OA 20","score":12,"maxScore":16,"absent":false},{"studentId":"E30","evaluationId":"D1","objective":"CN1M OAH d, f","score":6,"maxScore":8,"absent":false},{"studentId":"E31","evaluationId":"D1","objective":"CN1M OA 17","score":3,"maxScore":8,"absent":false},{"studentId":"E31","evaluationId":"D1","objective":"CN1M OA 18","score":2,"maxScore":8,"absent":false},{"studentId":"E31","evaluationId":"D1","objective":"CN1M OA 20","score":4,"maxScore":16,"absent":false},{"studentId":"E31","evaluationId":"D1","objective":"CN1M OAH d, f","score":5,"maxScore":8,"absent":false},{"studentId":"E32","evaluationId":"D1","objective":"CN1M OA 17","score":4,"maxScore":8,"absent":false},{"studentId":"E32","evaluationId":"D1","objective":"CN1M OA 18","score":2,"maxScore":8,"absent":false},{"studentId":"E32","evaluationId":"D1","objective":"CN1M OA 20","score":4,"maxScore":16,"absent":false},{"studentId":"E32","evaluationId":"D1","objective":"CN1M OAH d, f","score":4,"maxScore":8,"absent":false},{"studentId":"E33","evaluationId":"D1","objective":"CN1M OA 17","score":2,"maxScore":8,"absent":false},{"studentId":"E33","evaluationId":"D1","objective":"CN1M OA 18","score":2,"maxScore":8,"absent":false},{"studentId":"E33","evaluationId":"D1","objective":"CN1M OA 20","score":5,"maxScore":16,"absent":false},{"studentId":"E33","evaluationId":"D1","objective":"CN1M OAH d, f","score":4,"maxScore":8,"absent":false},{"studentId":"E34","evaluationId":"D1","objective":"CN1M OA 17","score":5,"maxScore":8,"absent":false},{"studentId":"E34","evaluationId":"D1","objective":"CN1M OA 18","score":4,"maxScore":8,"absent":false},{"studentId":"E34","evaluationId":"D1","objective":"CN1M OA 20","score":7,"maxScore":16,"absent":false},{"studentId":"E34","evaluationId":"D1","objective":"CN1M OAH d, f","score":4,"maxScore":8,"absent":false},{"studentId":"E35","evaluationId":"D1","objective":"CN1M OA 17","score":6,"maxScore":8,"absent":false},{"studentId":"E35","evaluationId":"D1","objective":"CN1M OA 18","score":3,"maxScore":8,"absent":false},{"studentId":"E35","evaluationId":"D1","objective":"CN1M OA 20","score":9,"maxScore":16,"absent":false},{"studentId":"E35","evaluationId":"D1","objective":"CN1M OAH d, f","score":6,"maxScore":8,"absent":false},{"studentId":"E01","evaluationId":"F1","objective":"CN1M OA 17","score":6,"maxScore":10,"absent":false},{"studentId":"E02","evaluationId":"F1","objective":"CN1M OA 17","score":8,"maxScore":10,"absent":false},{"studentId":"E03","evaluationId":"F1","objective":"CN1M OA 17","score":8,"maxScore":10,"absent":false},{"studentId":"E04","evaluationId":"F1","objective":"CN1M OA 17","score":7,"maxScore":10,"absent":false},{"studentId":"E05","evaluationId":"F1","objective":"CN1M OA 17","score":5,"maxScore":10,"absent":false},{"studentId":"E06","evaluationId":"F1","objective":"CN1M OA 17","score":8,"maxScore":10,"absent":false},{"studentId":"E07","evaluationId":"F1","objective":"CN1M OA 17","score":6,"maxScore":10,"absent":false},{"studentId":"E08","evaluationId":"F1","objective":"CN1M OA 17","score":7,"maxScore":10,"absent":false},{"studentId":"E09","evaluationId":"F1","objective":"CN1M OA 17","score":6,"maxScore":10,"absent":false},{"studentId":"E10","evaluationId":"F1","objective":"CN1M OA 17","score":10,"maxScore":10,"absent":false},{"studentId":"E11","evaluationId":"F1","objective":"CN1M OA 17","score":null,"maxScore":10,"absent":true},{"studentId":"E12","evaluationId":"F1","objective":"CN1M OA 17","score":7,"maxScore":10,"absent":false},{"studentId":"E13","evaluationId":"F1","objective":"CN1M OA 17","score":7,"maxScore":10,"absent":false},{"studentId":"E14","evaluationId":"F1","objective":"CN1M OA 17","score":6,"maxScore":10,"absent":false},{"studentId":"E15","evaluationId":"F1","objective":"CN1M OA 17","score":6,"maxScore":10,"absent":false},{"studentId":"E16","evaluationId":"F1","objective":"CN1M OA 17","score":null,"maxScore":10,"absent":true},{"studentId":"E17","evaluationId":"F1","objective":"CN1M OA 17","score":8,"maxScore":10,"absent":false},{"studentId":"E18","evaluationId":"F1","objective":"CN1M OA 17","score":8,"maxScore":10,"absent":false},{"studentId":"E19","evaluationId":"F1","objective":"CN1M OA 17","score":7,"maxScore":10,"absent":false},{"studentId":"E20","evaluationId":"F1","objective":"CN1M OA 17","score":7,"maxScore":10,"absent":false},{"studentId":"E21","evaluationId":"F1","objective":"CN1M OA 17","score":8,"maxScore":10,"absent":false},{"studentId":"E22","evaluationId":"F1","objective":"CN1M OA 17","score":6,"maxScore":10,"absent":false},{"studentId":"E23","evaluationId":"F1","objective":"CN1M OA 17","score":7,"maxScore":10,"absent":false},{"studentId":"E24","evaluationId":"F1","objective":"CN1M OA 17","score":7,"maxScore":10,"absent":false},{"studentId":"E25","evaluationId":"F1","objective":"CN1M OA 17","score":5,"maxScore":10,"absent":false},{"studentId":"E26","evaluationId":"F1","objective":"CN1M OA 17","score":7,"maxScore":10,"absent":false},{"studentId":"E27","evaluationId":"F1","objective":"CN1M OA 17","score":7,"maxScore":10,"absent":false},{"studentId":"E28","evaluationId":"F1","objective":"CN1M OA 17","score":7,"maxScore":10,"absent":false},{"studentId":"E29","evaluationId":"F1","objective":"CN1M OA 17","score":8,"maxScore":10,"absent":false},{"studentId":"E30","evaluationId":"F1","objective":"CN1M OA 17","score":8,"maxScore":10,"absent":false},{"studentId":"E31","evaluationId":"F1","objective":"CN1M OA 17","score":6,"maxScore":10,"absent":false},{"studentId":"E32","evaluationId":"F1","objective":"CN1M OA 17","score":5,"maxScore":10,"absent":false},{"studentId":"E33","evaluationId":"F1","objective":"CN1M OA 17","score":6,"maxScore":10,"absent":false},{"studentId":"E34","evaluationId":"F1","objective":"CN1M OA 17","score":7,"maxScore":10,"absent":false},{"studentId":"E35","evaluationId":"F1","objective":"CN1M OA 17","score":8,"maxScore":10,"absent":false},{"studentId":"E01","evaluationId":"F2","objective":"CN1M OA 18","score":6,"maxScore":10,"absent":false},{"studentId":"E02","evaluationId":"F2","objective":"CN1M OA 18","score":5,"maxScore":10,"absent":false},{"studentId":"E03","evaluationId":"F2","objective":"CN1M OA 18","score":8,"maxScore":10,"absent":false},{"studentId":"E04","evaluationId":"F2","objective":"CN1M OA 18","score":7,"maxScore":10,"absent":false},{"studentId":"E05","evaluationId":"F2","objective":"CN1M OA 18","score":null,"maxScore":10,"absent":true},{"studentId":"E06","evaluationId":"F2","objective":"CN1M OA 18","score":5,"maxScore":10,"absent":false},{"studentId":"E07","evaluationId":"F2","objective":"CN1M OA 18","score":5,"maxScore":10,"absent":false},{"studentId":"E08","evaluationId":"F2","objective":"CN1M OA 18","score":6,"maxScore":10,"absent":false},{"studentId":"E09","evaluationId":"F2","objective":"CN1M OA 18","score":7,"maxScore":10,"absent":false},{"studentId":"E10","evaluationId":"F2","objective":"CN1M OA 18","score":6,"maxScore":10,"absent":false},{"studentId":"E11","evaluationId":"F2","objective":"CN1M OA 18","score":5,"maxScore":10,"absent":false},{"studentId":"E12","evaluationId":"F2","objective":"CN1M OA 18","score":null,"maxScore":10,"absent":true},{"studentId":"E13","evaluationId":"F2","objective":"CN1M OA 18","score":6,"maxScore":10,"absent":false},{"studentId":"E14","evaluationId":"F2","objective":"CN1M OA 18","score":6,"maxScore":10,"absent":false},{"studentId":"E15","evaluationId":"F2","objective":"CN1M OA 18","score":6,"maxScore":10,"absent":false},{"studentId":"E16","evaluationId":"F2","objective":"CN1M OA 18","score":7,"maxScore":10,"absent":false},{"studentId":"E17","evaluationId":"F2","objective":"CN1M OA 18","score":4,"maxScore":10,"absent":false},{"studentId":"E18","evaluationId":"F2","objective":"CN1M OA 18","score":7,"maxScore":10,"absent":false},{"studentId":"E19","evaluationId":"F2","objective":"CN1M OA 18","score":8,"maxScore":10,"absent":false},{"studentId":"E20","evaluationId":"F2","objective":"CN1M OA 18","score":7,"maxScore":10,"absent":false},{"studentId":"E21","evaluationId":"F2","objective":"CN1M OA 18","score":4,"maxScore":10,"absent":false},{"studentId":"E22","evaluationId":"F2","objective":"CN1M OA 18","score":3,"maxScore":10,"absent":false},{"studentId":"E23","evaluationId":"F2","objective":"CN1M OA 18","score":8,"maxScore":10,"absent":false},{"studentId":"E24","evaluationId":"F2","objective":"CN1M OA 18","score":6,"maxScore":10,"absent":false},{"studentId":"E25","evaluationId":"F2","objective":"CN1M OA 18","score":4,"maxScore":10,"absent":false},{"studentId":"E26","evaluationId":"F2","objective":"CN1M OA 18","score":5,"maxScore":10,"absent":false},{"studentId":"E27","evaluationId":"F2","objective":"CN1M OA 18","score":7,"maxScore":10,"absent":false},{"studentId":"E28","evaluationId":"F2","objective":"CN1M OA 18","score":5,"maxScore":10,"absent":false},{"studentId":"E29","evaluationId":"F2","objective":"CN1M OA 18","score":9,"maxScore":10,"absent":false},{"studentId":"E30","evaluationId":"F2","objective":"CN1M OA 18","score":7,"maxScore":10,"absent":false},{"studentId":"E31","evaluationId":"F2","objective":"CN1M OA 18","score":3,"maxScore":10,"absent":false},{"studentId":"E32","evaluationId":"F2","objective":"CN1M OA 18","score":6,"maxScore":10,"absent":false},{"studentId":"E33","evaluationId":"F2","objective":"CN1M OA 18","score":5,"maxScore":10,"absent":false},{"studentId":"E34","evaluationId":"F2","objective":"CN1M OA 18","score":7,"maxScore":10,"absent":false},{"studentId":"E35","evaluationId":"F2","objective":"CN1M OA 18","score":6,"maxScore":10,"absent":false},{"studentId":"E01","evaluationId":"S1","objective":"CN1M OA 17","score":15,"maxScore":20,"absent":false},{"studentId":"E01","evaluationId":"S1","objective":"CN1M OA 18","score":12,"maxScore":20,"absent":false},{"studentId":"E02","evaluationId":"S1","objective":"CN1M OA 17","score":13,"maxScore":20,"absent":false},{"studentId":"E02","evaluationId":"S1","objective":"CN1M OA 18","score":12,"maxScore":20,"absent":false},{"studentId":"E03","evaluationId":"S1","objective":"CN1M OA 17","score":17,"maxScore":20,"absent":false},{"studentId":"E03","evaluationId":"S1","objective":"CN1M OA 18","score":14,"maxScore":20,"absent":false},{"studentId":"E04","evaluationId":"S1","objective":"CN1M OA 17","score":19,"maxScore":20,"absent":false},{"studentId":"E04","evaluationId":"S1","objective":"CN1M OA 18","score":15,"maxScore":20,"absent":false},{"studentId":"E05","evaluationId":"S1","objective":"CN1M OA 17","score":12,"maxScore":20,"absent":false},{"studentId":"E05","evaluationId":"S1","objective":"CN1M OA 18","score":7,"maxScore":20,"absent":false},{"studentId":"E06","evaluationId":"S1","objective":"CN1M OA 17","score":13,"maxScore":20,"absent":false},{"studentId":"E06","evaluationId":"S1","objective":"CN1M OA 18","score":12,"maxScore":20,"absent":false},{"studentId":"E07","evaluationId":"S1","objective":"CN1M OA 17","score":11,"maxScore":20,"absent":false},{"studentId":"E07","evaluationId":"S1","objective":"CN1M OA 18","score":12,"maxScore":20,"absent":false},{"studentId":"E08","evaluationId":"S1","objective":"CN1M OA 17","score":14,"maxScore":20,"absent":false},{"studentId":"E08","evaluationId":"S1","objective":"CN1M OA 18","score":13,"maxScore":20,"absent":false},{"studentId":"E09","evaluationId":"S1","objective":"CN1M OA 17","score":13,"maxScore":20,"absent":false},{"studentId":"E09","evaluationId":"S1","objective":"CN1M OA 18","score":12,"maxScore":20,"absent":false},{"studentId":"E10","evaluationId":"S1","objective":"CN1M OA 17","score":20,"maxScore":20,"absent":false},{"studentId":"E10","evaluationId":"S1","objective":"CN1M OA 18","score":16,"maxScore":20,"absent":false},{"studentId":"E11","evaluationId":"S1","objective":"CN1M OA 17","score":16,"maxScore":20,"absent":false},{"studentId":"E11","evaluationId":"S1","objective":"CN1M OA 18","score":10,"maxScore":20,"absent":false},{"studentId":"E12","evaluationId":"S1","objective":"CN1M OA 17","score":13,"maxScore":20,"absent":false},{"studentId":"E12","evaluationId":"S1","objective":"CN1M OA 18","score":14,"maxScore":20,"absent":false},{"studentId":"E13","evaluationId":"S1","objective":"CN1M OA 17","score":12,"maxScore":20,"absent":false},{"studentId":"E13","evaluationId":"S1","objective":"CN1M OA 18","score":11,"maxScore":20,"absent":false},{"studentId":"E14","evaluationId":"S1","objective":"CN1M OA 17","score":16,"maxScore":20,"absent":false},{"studentId":"E14","evaluationId":"S1","objective":"CN1M OA 18","score":15,"maxScore":20,"absent":false},{"studentId":"E15","evaluationId":"S1","objective":"CN1M OA 17","score":12,"maxScore":20,"absent":false},{"studentId":"E15","evaluationId":"S1","objective":"CN1M OA 18","score":14,"maxScore":20,"absent":false},{"studentId":"E16","evaluationId":"S1","objective":"CN1M OA 17","score":20,"maxScore":20,"absent":false},{"studentId":"E16","evaluationId":"S1","objective":"CN1M OA 18","score":17,"maxScore":20,"absent":false},{"studentId":"E17","evaluationId":"S1","objective":"CN1M OA 17","score":12,"maxScore":20,"absent":false},{"studentId":"E17","evaluationId":"S1","objective":"CN1M OA 18","score":10,"maxScore":20,"absent":false},{"studentId":"E18","evaluationId":"S1","objective":"CN1M OA 17","score":14,"maxScore":20,"absent":false},{"studentId":"E18","evaluationId":"S1","objective":"CN1M OA 18","score":10,"maxScore":20,"absent":false},{"studentId":"E19","evaluationId":"S1","objective":"CN1M OA 17","score":16,"maxScore":20,"absent":false},{"studentId":"E19","evaluationId":"S1","objective":"CN1M OA 18","score":14,"maxScore":20,"absent":false},{"studentId":"E20","evaluationId":"S1","objective":"CN1M OA 17","score":17,"maxScore":20,"absent":false},{"studentId":"E20","evaluationId":"S1","objective":"CN1M OA 18","score":17,"maxScore":20,"absent":false},{"studentId":"E21","evaluationId":"S1","objective":"CN1M OA 17","score":13,"maxScore":20,"absent":false},{"studentId":"E21","evaluationId":"S1","objective":"CN1M OA 18","score":9,"maxScore":20,"absent":false},{"studentId":"E22","evaluationId":"S1","objective":"CN1M OA 17","score":13,"maxScore":20,"absent":false},{"studentId":"E22","evaluationId":"S1","objective":"CN1M OA 18","score":8,"maxScore":20,"absent":false},{"studentId":"E23","evaluationId":"S1","objective":"CN1M OA 17","score":16,"maxScore":20,"absent":false},{"studentId":"E23","evaluationId":"S1","objective":"CN1M OA 18","score":15,"maxScore":20,"absent":false},{"studentId":"E24","evaluationId":"S1","objective":"CN1M OA 17","score":15,"maxScore":20,"absent":false},{"studentId":"E24","evaluationId":"S1","objective":"CN1M OA 18","score":12,"maxScore":20,"absent":false},{"studentId":"E25","evaluationId":"S1","objective":"CN1M OA 17","score":12,"maxScore":20,"absent":false},{"studentId":"E25","evaluationId":"S1","objective":"CN1M OA 18","score":13,"maxScore":20,"absent":false},{"studentId":"E26","evaluationId":"S1","objective":"CN1M OA 17","score":12,"maxScore":20,"absent":false},{"studentId":"E26","evaluationId":"S1","objective":"CN1M OA 18","score":10,"maxScore":20,"absent":false},{"studentId":"E27","evaluationId":"S1","objective":"CN1M OA 17","score":19,"maxScore":20,"absent":false},{"studentId":"E27","evaluationId":"S1","objective":"CN1M OA 18","score":16,"maxScore":20,"absent":false},{"studentId":"E28","evaluationId":"S1","objective":"CN1M OA 17","score":15,"maxScore":20,"absent":false},{"studentId":"E28","evaluationId":"S1","objective":"CN1M OA 18","score":13,"maxScore":20,"absent":false},{"studentId":"E29","evaluationId":"S1","objective":"CN1M OA 17","score":13,"maxScore":20,"absent":false},{"studentId":"E29","evaluationId":"S1","objective":"CN1M OA 18","score":13,"maxScore":20,"absent":false},{"studentId":"E30","evaluationId":"S1","objective":"CN1M OA 17","score":16,"maxScore":20,"absent":false},{"studentId":"E30","evaluationId":"S1","objective":"CN1M OA 18","score":14,"maxScore":20,"absent":false},{"studentId":"E31","evaluationId":"S1","objective":"CN1M OA 17","score":12,"maxScore":20,"absent":false},{"studentId":"E31","evaluationId":"S1","objective":"CN1M OA 18","score":9,"maxScore":20,"absent":false},{"studentId":"E32","evaluationId":"S1","objective":"CN1M OA 17","score":10,"maxScore":20,"absent":false},{"studentId":"E32","evaluationId":"S1","objective":"CN1M OA 18","score":9,"maxScore":20,"absent":false},{"studentId":"E33","evaluationId":"S1","objective":"CN1M OA 17","score":10,"maxScore":20,"absent":false},{"studentId":"E33","evaluationId":"S1","objective":"CN1M OA 18","score":8,"maxScore":20,"absent":false},{"studentId":"E34","evaluationId":"S1","objective":"CN1M OA 17","score":16,"maxScore":20,"absent":false},{"studentId":"E34","evaluationId":"S1","objective":"CN1M OA 18","score":12,"maxScore":20,"absent":false},{"studentId":"E35","evaluationId":"S1","objective":"CN1M OA 17","score":14,"maxScore":20,"absent":false},{"studentId":"E35","evaluationId":"S1","objective":"CN1M OA 18","score":12,"maxScore":20,"absent":false},{"studentId":"E01","evaluationId":"F3","objective":"CN1M OA 20","score":7,"maxScore":10,"absent":false},{"studentId":"E02","evaluationId":"F3","objective":"CN1M OA 20","score":6,"maxScore":10,"absent":false},{"studentId":"E03","evaluationId":"F3","objective":"CN1M OA 20","score":8,"maxScore":10,"absent":false},{"studentId":"E04","evaluationId":"F3","objective":"CN1M OA 20","score":7,"maxScore":10,"absent":false},{"studentId":"E05","evaluationId":"F3","objective":"CN1M OA 20","score":4,"maxScore":10,"absent":false},{"studentId":"E06","evaluationId":"F3","objective":"CN1M OA 20","score":5,"maxScore":10,"absent":false},{"studentId":"E07","evaluationId":"F3","objective":"CN1M OA 20","score":5,"maxScore":10,"absent":false},{"studentId":"E08","evaluationId":"F3","objective":"CN1M OA 20","score":6,"maxScore":10,"absent":false},{"studentId":"E09","evaluationId":"F3","objective":"CN1M OA 20","score":4,"maxScore":10,"absent":false},{"studentId":"E10","evaluationId":"F3","objective":"CN1M OA 20","score":9,"maxScore":10,"absent":false},{"studentId":"E11","evaluationId":"F3","objective":"CN1M OA 20","score":5,"maxScore":10,"absent":false},{"studentId":"E12","evaluationId":"F3","objective":"CN1M OA 20","score":7,"maxScore":10,"absent":false},{"studentId":"E13","evaluationId":"F3","objective":"CN1M OA 20","score":5,"maxScore":10,"absent":false},{"studentId":"E14","evaluationId":"F3","objective":"CN1M OA 20","score":7,"maxScore":10,"absent":false},{"studentId":"E15","evaluationId":"F3","objective":"CN1M OA 20","score":9,"maxScore":10,"absent":false},{"studentId":"E16","evaluationId":"F3","objective":"CN1M OA 20","score":7,"maxScore":10,"absent":false},{"studentId":"E17","evaluationId":"F3","objective":"CN1M OA 20","score":6,"maxScore":10,"absent":false},{"studentId":"E18","evaluationId":"F3","objective":"CN1M OA 20","score":6,"maxScore":10,"absent":false},{"studentId":"E19","evaluationId":"F3","objective":"CN1M OA 20","score":6,"maxScore":10,"absent":false},{"studentId":"E20","evaluationId":"F3","objective":"CN1M OA 20","score":7,"maxScore":10,"absent":false},{"studentId":"E21","evaluationId":"F3","objective":"CN1M OA 20","score":null,"maxScore":10,"absent":true},{"studentId":"E22","evaluationId":"F3","objective":"CN1M OA 20","score":4,"maxScore":10,"absent":false},{"studentId":"E23","evaluationId":"F3","objective":"CN1M OA 20","score":5,"maxScore":10,"absent":false},{"studentId":"E24","evaluationId":"F3","objective":"CN1M OA 20","score":5,"maxScore":10,"absent":false},{"studentId":"E25","evaluationId":"F3","objective":"CN1M OA 20","score":5,"maxScore":10,"absent":false},{"studentId":"E26","evaluationId":"F3","objective":"CN1M OA 20","score":5,"maxScore":10,"absent":false},{"studentId":"E27","evaluationId":"F3","objective":"CN1M OA 20","score":8,"maxScore":10,"absent":false},{"studentId":"E28","evaluationId":"F3","objective":"CN1M OA 20","score":null,"maxScore":10,"absent":true},{"studentId":"E29","evaluationId":"F3","objective":"CN1M OA 20","score":7,"maxScore":10,"absent":false},{"studentId":"E30","evaluationId":"F3","objective":"CN1M OA 20","score":6,"maxScore":10,"absent":false},{"studentId":"E31","evaluationId":"F3","objective":"CN1M OA 20","score":4,"maxScore":10,"absent":false},{"studentId":"E32","evaluationId":"F3","objective":"CN1M OA 20","score":4,"maxScore":10,"absent":false},{"studentId":"E33","evaluationId":"F3","objective":"CN1M OA 20","score":4,"maxScore":10,"absent":false},{"studentId":"E34","evaluationId":"F3","objective":"CN1M OA 20","score":5,"maxScore":10,"absent":false},{"studentId":"E35","evaluationId":"F3","objective":"CN1M OA 20","score":7,"maxScore":10,"absent":false},{"studentId":"E01","evaluationId":"S2","objective":"CN1M OA 20","score":11,"maxScore":20,"absent":false},{"studentId":"E02","evaluationId":"S2","objective":"CN1M OA 20","score":12,"maxScore":20,"absent":false},{"studentId":"E03","evaluationId":"S2","objective":"CN1M OA 20","score":13,"maxScore":20,"absent":false},{"studentId":"E04","evaluationId":"S2","objective":"CN1M OA 20","score":17,"maxScore":20,"absent":false},{"studentId":"E05","evaluationId":"S2","objective":"CN1M OA 20","score":12,"maxScore":20,"absent":false},{"studentId":"E06","evaluationId":"S2","objective":"CN1M OA 20","score":10,"maxScore":20,"absent":false},{"studentId":"E07","evaluationId":"S2","objective":"CN1M OA 20","score":11,"maxScore":20,"absent":false},{"studentId":"E08","evaluationId":"S2","objective":"CN1M OA 20","score":12,"maxScore":20,"absent":false},{"studentId":"E09","evaluationId":"S2","objective":"CN1M OA 20","score":7,"maxScore":20,"absent":false},{"studentId":"E10","evaluationId":"S2","objective":"CN1M OA 20","score":18,"maxScore":20,"absent":false},{"studentId":"E11","evaluationId":"S2","objective":"CN1M OA 20","score":10,"maxScore":20,"absent":false},{"studentId":"E12","evaluationId":"S2","objective":"CN1M OA 20","score":13,"maxScore":20,"absent":false},{"studentId":"E13","evaluationId":"S2","objective":"CN1M OA 20","score":12,"maxScore":20,"absent":false},{"studentId":"E14","evaluationId":"S2","objective":"CN1M OA 20","score":14,"maxScore":20,"absent":false},{"studentId":"E15","evaluationId":"S2","objective":"CN1M OA 20","score":16,"maxScore":20,"absent":false},{"studentId":"E16","evaluationId":"S2","objective":"CN1M OA 20","score":15,"maxScore":20,"absent":false},{"studentId":"E17","evaluationId":"S2","objective":"CN1M OA 20","score":9,"maxScore":20,"absent":false},{"studentId":"E18","evaluationId":"S2","objective":"CN1M OA 20","score":9,"maxScore":20,"absent":false},{"studentId":"E19","evaluationId":"S2","objective":"CN1M OA 20","score":16,"maxScore":20,"absent":false},{"studentId":"E20","evaluationId":"S2","objective":"CN1M OA 20","score":14,"maxScore":20,"absent":false},{"studentId":"E21","evaluationId":"S2","objective":"CN1M OA 20","score":9,"maxScore":20,"absent":false},{"studentId":"E22","evaluationId":"S2","objective":"CN1M OA 20","score":10,"maxScore":20,"absent":false},{"studentId":"E23","evaluationId":"S2","objective":"CN1M OA 20","score":10,"maxScore":20,"absent":false},{"studentId":"E24","evaluationId":"S2","objective":"CN1M OA 20","score":14,"maxScore":20,"absent":false},{"studentId":"E25","evaluationId":"S2","objective":"CN1M OA 20","score":11,"maxScore":20,"absent":false},{"studentId":"E26","evaluationId":"S2","objective":"CN1M OA 20","score":9,"maxScore":20,"absent":false},{"studentId":"E27","evaluationId":"S2","objective":"CN1M OA 20","score":17,"maxScore":20,"absent":false},{"studentId":"E28","evaluationId":"S2","objective":"CN1M OA 20","score":11,"maxScore":20,"absent":false},{"studentId":"E29","evaluationId":"S2","objective":"CN1M OA 20","score":15,"maxScore":20,"absent":false},{"studentId":"E30","evaluationId":"S2","objective":"CN1M OA 20","score":9,"maxScore":20,"absent":false},{"studentId":"E31","evaluationId":"S2","objective":"CN1M OA 20","score":5,"maxScore":20,"absent":false},{"studentId":"E32","evaluationId":"S2","objective":"CN1M OA 20","score":10,"maxScore":20,"absent":false},{"studentId":"E33","evaluationId":"S2","objective":"CN1M OA 20","score":10,"maxScore":20,"absent":false},{"studentId":"E34","evaluationId":"S2","objective":"CN1M OA 20","score":11,"maxScore":20,"absent":false},{"studentId":"E35","evaluationId":"S2","objective":"CN1M OA 20","score":14,"maxScore":20,"absent":false},{"studentId":"E01","evaluationId":"F4","objective":"CN1M OA 20","score":5,"maxScore":10,"absent":false},{"studentId":"E02","evaluationId":"F4","objective":"CN1M OA 20","score":6,"maxScore":10,"absent":false},{"studentId":"E03","evaluationId":"F4","objective":"CN1M OA 20","score":8,"maxScore":10,"absent":false},{"studentId":"E04","evaluationId":"F4","objective":"CN1M OA 20","score":null,"maxScore":10,"absent":true},{"studentId":"E05","evaluationId":"F4","objective":"CN1M OA 20","score":6,"maxScore":10,"absent":false},{"studentId":"E06","evaluationId":"F4","objective":"CN1M OA 20","score":6,"maxScore":10,"absent":false},{"studentId":"E07","evaluationId":"F4","objective":"CN1M OA 20","score":5,"maxScore":10,"absent":false},{"studentId":"E08","evaluationId":"F4","objective":"CN1M OA 20","score":6,"maxScore":10,"absent":false},{"studentId":"E09","evaluationId":"F4","objective":"CN1M OA 20","score":3,"maxScore":10,"absent":false},{"studentId":"E10","evaluationId":"F4","objective":"CN1M OA 20","score":8,"maxScore":10,"absent":false},{"studentId":"E11","evaluationId":"F4","objective":"CN1M OA 20","score":4,"maxScore":10,"absent":false},{"studentId":"E12","evaluationId":"F4","objective":"CN1M OA 20","score":8,"maxScore":10,"absent":false},{"studentId":"E13","evaluationId":"F4","objective":"CN1M OA 20","score":5,"maxScore":10,"absent":false},{"studentId":"E14","evaluationId":"F4","objective":"CN1M OA 20","score":6,"maxScore":10,"absent":false},{"studentId":"E15","evaluationId":"F4","objective":"CN1M OA 20","score":6,"maxScore":10,"absent":false},{"studentId":"E16","evaluationId":"F4","objective":"CN1M OA 20","score":7,"maxScore":10,"absent":false},{"studentId":"E17","evaluationId":"F4","objective":"CN1M OA 20","score":4,"maxScore":10,"absent":false},{"studentId":"E18","evaluationId":"F4","objective":"CN1M OA 20","score":3,"maxScore":10,"absent":false},{"studentId":"E19","evaluationId":"F4","objective":"CN1M OA 20","score":7,"maxScore":10,"absent":false},{"studentId":"E20","evaluationId":"F4","objective":"CN1M OA 20","score":8,"maxScore":10,"absent":false},{"studentId":"E21","evaluationId":"F4","objective":"CN1M OA 20","score":4,"maxScore":10,"absent":false},{"studentId":"E22","evaluationId":"F4","objective":"CN1M OA 20","score":4,"maxScore":10,"absent":false},{"studentId":"E23","evaluationId":"F4","objective":"CN1M OA 20","score":6,"maxScore":10,"absent":false},{"studentId":"E24","evaluationId":"F4","objective":"CN1M OA 20","score":7,"maxScore":10,"absent":false},{"studentId":"E25","evaluationId":"F4","objective":"CN1M OA 20","score":6,"maxScore":10,"absent":false},{"studentId":"E26","evaluationId":"F4","objective":"CN1M OA 20","score":7,"maxScore":10,"absent":false},{"studentId":"E27","evaluationId":"F4","objective":"CN1M OA 20","score":8,"maxScore":10,"absent":false},{"studentId":"E28","evaluationId":"F4","objective":"CN1M OA 20","score":6,"maxScore":10,"absent":false},{"studentId":"E29","evaluationId":"F4","objective":"CN1M OA 20","score":7,"maxScore":10,"absent":false},{"studentId":"E30","evaluationId":"F4","objective":"CN1M OA 20","score":4,"maxScore":10,"absent":false},{"studentId":"E31","evaluationId":"F4","objective":"CN1M OA 20","score":4,"maxScore":10,"absent":false},{"studentId":"E32","evaluationId":"F4","objective":"CN1M OA 20","score":5,"maxScore":10,"absent":false},{"studentId":"E33","evaluationId":"F4","objective":"CN1M OA 20","score":5,"maxScore":10,"absent":false},{"studentId":"E34","evaluationId":"F4","objective":"CN1M OA 20","score":6,"maxScore":10,"absent":false},{"studentId":"E35","evaluationId":"F4","objective":"CN1M OA 20","score":6,"maxScore":10,"absent":false},{"studentId":"E01","evaluationId":"F5","objective":"CN1M OAH d, f","score":10,"maxScore":10,"absent":false},{"studentId":"E02","evaluationId":"F5","objective":"CN1M OAH d, f","score":8,"maxScore":10,"absent":false},{"studentId":"E03","evaluationId":"F5","objective":"CN1M OAH d, f","score":10,"maxScore":10,"absent":false},{"studentId":"E04","evaluationId":"F5","objective":"CN1M OAH d, f","score":10,"maxScore":10,"absent":false},{"studentId":"E05","evaluationId":"F5","objective":"CN1M OAH d, f","score":7,"maxScore":10,"absent":false},{"studentId":"E06","evaluationId":"F5","objective":"CN1M OAH d, f","score":8,"maxScore":10,"absent":false},{"studentId":"E07","evaluationId":"F5","objective":"CN1M OAH d, f","score":5,"maxScore":10,"absent":false},{"studentId":"E08","evaluationId":"F5","objective":"CN1M OAH d, f","score":9,"maxScore":10,"absent":false},{"studentId":"E09","evaluationId":"F5","objective":"CN1M OAH d, f","score":6,"maxScore":10,"absent":false},{"studentId":"E10","evaluationId":"F5","objective":"CN1M OAH d, f","score":10,"maxScore":10,"absent":false},{"studentId":"E11","evaluationId":"F5","objective":"CN1M OAH d, f","score":8,"maxScore":10,"absent":false},{"studentId":"E12","evaluationId":"F5","objective":"CN1M OAH d, f","score":9,"maxScore":10,"absent":false},{"studentId":"E13","evaluationId":"F5","objective":"CN1M OAH d, f","score":7,"maxScore":10,"absent":false},{"studentId":"E14","evaluationId":"F5","objective":"CN1M OAH d, f","score":7,"maxScore":10,"absent":false},{"studentId":"E15","evaluationId":"F5","objective":"CN1M OAH d, f","score":7,"maxScore":10,"absent":false},{"studentId":"E16","evaluationId":"F5","objective":"CN1M OAH d, f","score":9,"maxScore":10,"absent":false},{"studentId":"E17","evaluationId":"F5","objective":"CN1M OAH d, f","score":6,"maxScore":10,"absent":false},{"studentId":"E18","evaluationId":"F5","objective":"CN1M OAH d, f","score":7,"maxScore":10,"absent":false},{"studentId":"E19","evaluationId":"F5","objective":"CN1M OAH d, f","score":10,"maxScore":10,"absent":false},{"studentId":"E20","evaluationId":"F5","objective":"CN1M OAH d, f","score":10,"maxScore":10,"absent":false},{"studentId":"E21","evaluationId":"F5","objective":"CN1M OAH d, f","score":7,"maxScore":10,"absent":false},{"studentId":"E22","evaluationId":"F5","objective":"CN1M OAH d, f","score":8,"maxScore":10,"absent":false},{"studentId":"E23","evaluationId":"F5","objective":"CN1M OAH d, f","score":8,"maxScore":10,"absent":false},{"studentId":"E24","evaluationId":"F5","objective":"CN1M OAH d, f","score":9,"maxScore":10,"absent":false},{"studentId":"E25","evaluationId":"F5","objective":"CN1M OAH d, f","score":10,"maxScore":10,"absent":false},{"studentId":"E26","evaluationId":"F5","objective":"CN1M OAH d, f","score":7,"maxScore":10,"absent":false},{"studentId":"E27","evaluationId":"F5","objective":"CN1M OAH d, f","score":null,"maxScore":10,"absent":true},{"studentId":"E28","evaluationId":"F5","objective":"CN1M OAH d, f","score":9,"maxScore":10,"absent":false},{"studentId":"E29","evaluationId":"F5","objective":"CN1M OAH d, f","score":10,"maxScore":10,"absent":false},{"studentId":"E30","evaluationId":"F5","objective":"CN1M OAH d, f","score":7,"maxScore":10,"absent":false},{"studentId":"E31","evaluationId":"F5","objective":"CN1M OAH d, f","score":5,"maxScore":10,"absent":false},{"studentId":"E32","evaluationId":"F5","objective":"CN1M OAH d, f","score":5,"maxScore":10,"absent":false},{"studentId":"E33","evaluationId":"F5","objective":"CN1M OAH d, f","score":6,"maxScore":10,"absent":false},{"studentId":"E34","evaluationId":"F5","objective":"CN1M OAH d, f","score":9,"maxScore":10,"absent":false},{"studentId":"E35","evaluationId":"F5","objective":"CN1M OAH d, f","score":9,"maxScore":10,"absent":false},{"studentId":"E01","evaluationId":"S3","objective":"CN1M OA 20","score":13,"maxScore":20,"absent":false},{"studentId":"E01","evaluationId":"S3","objective":"CN1M OAH d, f","score":19,"maxScore":20,"absent":false},{"studentId":"E02","evaluationId":"S3","objective":"CN1M OA 20","score":13,"maxScore":20,"absent":false},{"studentId":"E02","evaluationId":"S3","objective":"CN1M OAH d, f","score":13,"maxScore":20,"absent":false},{"studentId":"E03","evaluationId":"S3","objective":"CN1M OA 20","score":14,"maxScore":20,"absent":false},{"studentId":"E03","evaluationId":"S3","objective":"CN1M OAH d, f","score":20,"maxScore":20,"absent":false},{"studentId":"E04","evaluationId":"S3","objective":"CN1M OA 20","score":20,"maxScore":20,"absent":false},{"studentId":"E04","evaluationId":"S3","objective":"CN1M OAH d, f","score":20,"maxScore":20,"absent":false},{"studentId":"E05","evaluationId":"S3","objective":"CN1M OA 20","score":13,"maxScore":20,"absent":false},{"studentId":"E05","evaluationId":"S3","objective":"CN1M OAH d, f","score":13,"maxScore":20,"absent":false},{"studentId":"E06","evaluationId":"S3","objective":"CN1M OA 20","score":11,"maxScore":20,"absent":false},{"studentId":"E06","evaluationId":"S3","objective":"CN1M OAH d, f","score":15,"maxScore":20,"absent":false},{"studentId":"E07","evaluationId":"S3","objective":"CN1M OA 20","score":10,"maxScore":20,"absent":false},{"studentId":"E07","evaluationId":"S3","objective":"CN1M OAH d, f","score":12,"maxScore":20,"absent":false},{"studentId":"E08","evaluationId":"S3","objective":"CN1M OA 20","score":13,"maxScore":20,"absent":false},{"studentId":"E08","evaluationId":"S3","objective":"CN1M OAH d, f","score":19,"maxScore":20,"absent":false},{"studentId":"E09","evaluationId":"S3","objective":"CN1M OA 20","score":6,"maxScore":20,"absent":false},{"studentId":"E09","evaluationId":"S3","objective":"CN1M OAH d, f","score":10,"maxScore":20,"absent":false},{"studentId":"E10","evaluationId":"S3","objective":"CN1M OA 20","score":18,"maxScore":20,"absent":false},{"studentId":"E10","evaluationId":"S3","objective":"CN1M OAH d, f","score":20,"maxScore":20,"absent":false},{"studentId":"E11","evaluationId":"S3","objective":"CN1M OA 20","score":10,"maxScore":20,"absent":false},{"studentId":"E11","evaluationId":"S3","objective":"CN1M OAH d, f","score":17,"maxScore":20,"absent":false},{"studentId":"E12","evaluationId":"S3","objective":"CN1M OA 20","score":15,"maxScore":20,"absent":false},{"studentId":"E12","evaluationId":"S3","objective":"CN1M OAH d, f","score":15,"maxScore":20,"absent":false},{"studentId":"E13","evaluationId":"S3","objective":"CN1M OA 20","score":11,"maxScore":20,"absent":false},{"studentId":"E13","evaluationId":"S3","objective":"CN1M OAH d, f","score":14,"maxScore":20,"absent":false},{"studentId":"E14","evaluationId":"S3","objective":"CN1M OA 20","score":15,"maxScore":20,"absent":false},{"studentId":"E14","evaluationId":"S3","objective":"CN1M OAH d, f","score":17,"maxScore":20,"absent":false},{"studentId":"E15","evaluationId":"S3","objective":"CN1M OA 20","score":13,"maxScore":20,"absent":false},{"studentId":"E15","evaluationId":"S3","objective":"CN1M OAH d, f","score":16,"maxScore":20,"absent":false},{"studentId":"E16","evaluationId":"S3","objective":"CN1M OA 20","score":13,"maxScore":20,"absent":false},{"studentId":"E16","evaluationId":"S3","objective":"CN1M OAH d, f","score":17,"maxScore":20,"absent":false},{"studentId":"E17","evaluationId":"S3","objective":"CN1M OA 20","score":8,"maxScore":20,"absent":false},{"studentId":"E17","evaluationId":"S3","objective":"CN1M OAH d, f","score":10,"maxScore":20,"absent":false},{"studentId":"E18","evaluationId":"S3","objective":"CN1M OA 20","score":10,"maxScore":20,"absent":false},{"studentId":"E18","evaluationId":"S3","objective":"CN1M OAH d, f","score":16,"maxScore":20,"absent":false},{"studentId":"E19","evaluationId":"S3","objective":"CN1M OA 20","score":17,"maxScore":20,"absent":false},{"studentId":"E19","evaluationId":"S3","objective":"CN1M OAH d, f","score":19,"maxScore":20,"absent":false},{"studentId":"E20","evaluationId":"S3","objective":"CN1M OA 20","score":17,"maxScore":20,"absent":false},{"studentId":"E20","evaluationId":"S3","objective":"CN1M OAH d, f","score":20,"maxScore":20,"absent":false},{"studentId":"E21","evaluationId":"S3","objective":"CN1M OA 20","score":13,"maxScore":20,"absent":false},{"studentId":"E21","evaluationId":"S3","objective":"CN1M OAH d, f","score":12,"maxScore":20,"absent":false},{"studentId":"E22","evaluationId":"S3","objective":"CN1M OA 20","score":8,"maxScore":20,"absent":false},{"studentId":"E22","evaluationId":"S3","objective":"CN1M OAH d, f","score":16,"maxScore":20,"absent":false},{"studentId":"E23","evaluationId":"S3","objective":"CN1M OA 20","score":12,"maxScore":20,"absent":false},{"studentId":"E23","evaluationId":"S3","objective":"CN1M OAH d, f","score":15,"maxScore":20,"absent":false},{"studentId":"E24","evaluationId":"S3","objective":"CN1M OA 20","score":16,"maxScore":20,"absent":false},{"studentId":"E24","evaluationId":"S3","objective":"CN1M OAH d, f","score":19,"maxScore":20,"absent":false},{"studentId":"E25","evaluationId":"S3","objective":"CN1M OA 20","score":15,"maxScore":20,"absent":false},{"studentId":"E25","evaluationId":"S3","objective":"CN1M OAH d, f","score":14,"maxScore":20,"absent":false},{"studentId":"E26","evaluationId":"S3","objective":"CN1M OA 20","score":12,"maxScore":20,"absent":false},{"studentId":"E26","evaluationId":"S3","objective":"CN1M OAH d, f","score":15,"maxScore":20,"absent":false},{"studentId":"E27","evaluationId":"S3","objective":"CN1M OA 20","score":15,"maxScore":20,"absent":false},{"studentId":"E27","evaluationId":"S3","objective":"CN1M OAH d, f","score":19,"maxScore":20,"absent":false},{"studentId":"E28","evaluationId":"S3","objective":"CN1M OA 20","score":15,"maxScore":20,"absent":false},{"studentId":"E28","evaluationId":"S3","objective":"CN1M OAH d, f","score":17,"maxScore":20,"absent":false},{"studentId":"E29","evaluationId":"S3","objective":"CN1M OA 20","score":16,"maxScore":20,"absent":false},{"studentId":"E29","evaluationId":"S3","objective":"CN1M OAH d, f","score":18,"maxScore":20,"absent":false},{"studentId":"E30","evaluationId":"S3","objective":"CN1M OA 20","score":10,"maxScore":20,"absent":false},{"studentId":"E30","evaluationId":"S3","objective":"CN1M OAH d, f","score":10,"maxScore":20,"absent":false},{"studentId":"E31","evaluationId":"S3","objective":"CN1M OA 20","score":7,"maxScore":20,"absent":false},{"studentId":"E31","evaluationId":"S3","objective":"CN1M OAH d, f","score":9,"maxScore":20,"absent":false},{"studentId":"E32","evaluationId":"S3","objective":"CN1M OA 20","score":8,"maxScore":20,"absent":false},{"studentId":"E32","evaluationId":"S3","objective":"CN1M OAH d, f","score":12,"maxScore":20,"absent":false},{"studentId":"E33","evaluationId":"S3","objective":"CN1M OA 20","score":9,"maxScore":20,"absent":false},{"studentId":"E33","evaluationId":"S3","objective":"CN1M OAH d, f","score":14,"maxScore":20,"absent":false},{"studentId":"E34","evaluationId":"S3","objective":"CN1M OA 20","score":10,"maxScore":20,"absent":false},{"studentId":"E34","evaluationId":"S3","objective":"CN1M OAH d, f","score":17,"maxScore":20,"absent":false},{"studentId":"E35","evaluationId":"S3","objective":"CN1M OA 20","score":15,"maxScore":20,"absent":false},{"studentId":"E35","evaluationId":"S3","objective":"CN1M OAH d, f","score":17,"maxScore":20,"absent":false}],"questions":[{"evaluationId":"S1","number":1,"objective":"CN1M OA 17","points":1},{"evaluationId":"S1","number":2,"objective":"CN1M OA 18","points":1},{"evaluationId":"S1","number":3,"objective":"CN1M OA 17","points":1},{"evaluationId":"S1","number":4,"objective":"CN1M OA 17","points":1},{"evaluationId":"S1","number":5,"objective":"CN1M OA 17","points":1},{"evaluationId":"S1","number":6,"objective":"CN1M OA 18","points":1},{"evaluationId":"S1","number":7,"objective":"CN1M OA 18","points":1},{"evaluationId":"S1","number":8,"objective":"CN1M OA 18","points":1},{"evaluationId":"S1","number":9,"objective":"CN1M OA 18","points":1},{"evaluationId":"S1","number":10,"objective":"CN1M OA 18","points":1},{"evaluationId":"S1","number":11,"objective":"CN1M OA 17","points":1},{"evaluationId":"S1","number":12,"objective":"CN1M OA 17","points":1},{"evaluationId":"S1","number":13,"objective":"CN1M OA 17","points":1},{"evaluationId":"S1","number":14,"objective":"CN1M OA 18","points":1},{"evaluationId":"S1","number":15,"objective":"CN1M OA 17","points":1},{"evaluationId":"S1","number":16,"objective":"CN1M OA 18","points":1},{"evaluationId":"S1","number":17,"objective":"CN1M OA 17","points":1},{"evaluationId":"S1","number":18,"objective":"CN1M OA 18","points":1},{"evaluationId":"S1","number":19,"objective":"CN1M OA 18","points":1},{"evaluationId":"S1","number":20,"objective":"CN1M OA 18","points":1},{"evaluationId":"S1","number":21,"objective":"CN1M OA 18","points":1},{"evaluationId":"S1","number":22,"objective":"CN1M OA 17","points":1},{"evaluationId":"S1","number":23,"objective":"CN1M OA 17","points":1},{"evaluationId":"S1","number":24,"objective":"CN1M OA 17","points":1},{"evaluationId":"S1","number":25,"objective":"CN1M OA 18","points":1},{"evaluationId":"S1","number":26,"objective":"CN1M OA 18","points":1},{"evaluationId":"S1","number":27,"objective":"CN1M OA 18","points":1},{"evaluationId":"S1","number":28,"objective":"CN1M OA 17","points":1},{"evaluationId":"S1","number":29,"objective":"CN1M OA 17","points":1},{"evaluationId":"S1","number":30,"objective":"CN1M OA 18","points":1},{"evaluationId":"S1","number":31,"objective":"CN1M OA 17","points":1},{"evaluationId":"S1","number":32,"objective":"CN1M OA 17","points":1},{"evaluationId":"S1","number":33,"objective":"CN1M OA 18","points":1},{"evaluationId":"S1","number":34,"objective":"CN1M OA 17","points":1},{"evaluationId":"S1","number":35,"objective":"CN1M OA 17","points":1},{"evaluationId":"S1","number":36,"objective":"CN1M OA 18","points":1},{"evaluationId":"S1","number":37,"objective":"CN1M OA 18","points":1},{"evaluationId":"S1","number":38,"objective":"CN1M OA 17","points":1},{"evaluationId":"S1","number":39,"objective":"CN1M OA 18","points":1},{"evaluationId":"S1","number":40,"objective":"CN1M OA 17","points":1},{"evaluationId":"S2","number":1,"objective":"CN1M OA 20","points":1},{"evaluationId":"S2","number":2,"objective":"CN1M OA 20","points":1},{"evaluationId":"S2","number":3,"objective":"CN1M OA 20","points":1},{"evaluationId":"S2","number":4,"objective":"CN1M OA 20","points":1},{"evaluationId":"S2","number":5,"objective":"CN1M OA 20","points":1},{"evaluationId":"S2","number":6,"objective":"CN1M OA 20","points":1},{"evaluationId":"S2","number":7,"objective":"CN1M OA 20","points":1},{"evaluationId":"S2","number":8,"objective":"CN1M OA 20","points":1},{"evaluationId":"S2","number":9,"objective":"CN1M OA 20","points":1},{"evaluationId":"S2","number":10,"objective":"CN1M OA 20","points":1},{"evaluationId":"S2","number":11,"objective":"CN1M OA 20","points":1},{"evaluationId":"S2","number":12,"objective":"CN1M OA 20","points":1},{"evaluationId":"S2","number":13,"objective":"CN1M OA 20","points":1},{"evaluationId":"S2","number":14,"objective":"CN1M OA 20","points":1},{"evaluationId":"S2","number":15,"objective":"CN1M OA 20","points":1},{"evaluationId":"S2","number":16,"objective":"CN1M OA 20","points":1},{"evaluationId":"S2","number":17,"objective":"CN1M OA 20","points":1},{"evaluationId":"S2","number":18,"objective":"CN1M OA 20","points":1},{"evaluationId":"S2","number":19,"objective":"CN1M OA 20","points":1},{"evaluationId":"S2","number":20,"objective":"CN1M OA 20","points":1},{"evaluationId":"S3","number":1,"objective":"CN1M OA 20","points":1},{"evaluationId":"S3","number":2,"objective":"CN1M OA 20","points":1},{"evaluationId":"S3","number":3,"objective":"CN1M OA 20","points":1},{"evaluationId":"S3","number":4,"objective":"CN1M OAH d, f","points":1},{"evaluationId":"S3","number":5,"objective":"CN1M OA 20","points":1},{"evaluationId":"S3","number":6,"objective":"CN1M OAH d, f","points":1},{"evaluationId":"S3","number":7,"objective":"CN1M OAH d, f","points":1},{"evaluationId":"S3","number":8,"objective":"CN1M OAH d, f","points":1},{"evaluationId":"S3","number":9,"objective":"CN1M OA 20","points":1},{"evaluationId":"S3","number":10,"objective":"CN1M OA 20","points":1},{"evaluationId":"S3","number":11,"objective":"CN1M OAH d, f","points":1},{"evaluationId":"S3","number":12,"objective":"CN1M OAH d, f","points":1},{"evaluationId":"S3","number":13,"objective":"CN1M OA 20","points":1},{"evaluationId":"S3","number":14,"objective":"CN1M OAH d, f","points":1},{"evaluationId":"S3","number":15,"objective":"CN1M OAH d, f","points":1},{"evaluationId":"S3","number":16,"objective":"CN1M OA 20","points":1},{"evaluationId":"S3","number":17,"objective":"CN1M OA 20","points":1},{"evaluationId":"S3","number":18,"objective":"CN1M OAH d, f","points":1},{"evaluationId":"S3","number":19,"objective":"CN1M OA 20","points":1},{"evaluationId":"S3","number":20,"objective":"CN1M OAH d, f","points":1},{"evaluationId":"S3","number":21,"objective":"CN1M OAH d, f","points":1},{"evaluationId":"S3","number":22,"objective":"CN1M OA 20","points":1},{"evaluationId":"S3","number":23,"objective":"CN1M OAH d, f","points":1},{"evaluationId":"S3","number":24,"objective":"CN1M OA 20","points":1},{"evaluationId":"S3","number":25,"objective":"CN1M OAH d, f","points":1},{"evaluationId":"S3","number":26,"objective":"CN1M OAH d, f","points":1},{"evaluationId":"S3","number":27,"objective":"CN1M OA 20","points":1},{"evaluationId":"S3","number":28,"objective":"CN1M OAH d, f","points":1},{"evaluationId":"S3","number":29,"objective":"CN1M OA 20","points":1},{"evaluationId":"S3","number":30,"objective":"CN1M OAH d, f","points":1},{"evaluationId":"S3","number":31,"objective":"CN1M OA 20","points":1},{"evaluationId":"S3","number":32,"objective":"CN1M OA 20","points":1},{"evaluationId":"S3","number":33,"objective":"CN1M OAH d, f","points":1},{"evaluationId":"S3","number":34,"objective":"CN1M OAH d, f","points":1},{"evaluationId":"S3","number":35,"objective":"CN1M OA 20","points":1},{"evaluationId":"S3","number":36,"objective":"CN1M OA 20","points":1},{"evaluationId":"S3","number":37,"objective":"CN1M OAH d, f","points":1},{"evaluationId":"S3","number":38,"objective":"CN1M OAH d, f","points":1},{"evaluationId":"S3","number":39,"objective":"CN1M OA 20","points":1},{"evaluationId":"S3","number":40,"objective":"CN1M OA 20","points":1}],"answers":[{"studentId":"E01","evaluationId":"S1","correct":"1101101101100010110111110111100101011111"},{"studentId":"E02","evaluationId":"S1","correct":"1101101101100100110110110111101000110111"},{"studentId":"E03","evaluationId":"S1","correct":"1111101111110110110111110111110101010111"},{"studentId":"E04","evaluationId":"S1","correct":"1101101101111111111111110111101101111111"},{"studentId":"E05","evaluationId":"S1","correct":"1101101101000000100100010101101101010101"},{"studentId":"E06","evaluationId":"S1","correct":"1101101111001000110111110111100100010111"},{"studentId":"E07","evaluationId":"S1","correct":"1101101101000000100110110111110100011111"},{"studentId":"E08","evaluationId":"S1","correct":"1101111101100001101111110111100100110111"},{"studentId":"E09","evaluationId":"S1","correct":"1101101101100001110110110111100101010111"},{"studentId":"E10","evaluationId":"S1","correct":"1111111101111111110111111111101111110111"},{"studentId":"E11","evaluationId":"S1","correct":"1101111101110001100101110111100101110101"},{"studentId":"E12","evaluationId":"S1","correct":"1101111101100001110111110111100100011111"},{"studentId":"E13","evaluationId":"S1","correct":"1101101101000100100111110111100000110111"},{"studentId":"E14","evaluationId":"S1","correct":"1101111111100110101111110111100111110111"},{"studentId":"E15","evaluationId":"S1","correct":"1101101101100100110110111111101010010111"},{"studentId":"E16","evaluationId":"S1","correct":"1111111111111111110111110111111111111101"},{"studentId":"E17","evaluationId":"S1","correct":"1101101101010000110101110111001010010101"},{"studentId":"E18","evaluationId":"S1","correct":"1101111101000000110110110011101101110101"},{"studentId":"E19","evaluationId":"S1","correct":"1101100111100111110111111111100101110111"},{"studentId":"E20","evaluationId":"S1","correct":"1101101111111100110111111111111111011111"},{"studentId":"E21","evaluationId":"S1","correct":"1101101101100001010011010101001101110101"},{"studentId":"E22","evaluationId":"S1","correct":"1101100101110000110111010111000101000101"},{"studentId":"E23","evaluationId":"S1","correct":"1101101101110100111110111111101111110111"},{"studentId":"E24","evaluationId":"S1","correct":"1101101101101000110110110111101100111111"},{"studentId":"E25","evaluationId":"S1","correct":"1101101101100100110111110110100110010111"},{"studentId":"E26","evaluationId":"S1","correct":"1101101101110101010010110101000100110101"},{"studentId":"E27","evaluationId":"S1","correct":"1101101101111110111111111111101111111111"},{"studentId":"E28","evaluationId":"S1","correct":"1101111111100000100111110111100111110111"},{"studentId":"E29","evaluationId":"S1","correct":"1101101111110100110110110111100100010111"},{"studentId":"E30","evaluationId":"S1","correct":"1101101101100110110111111111101111010111"},{"studentId":"E31","evaluationId":"S1","correct":"1101101101100000010010110111100101010101"},{"studentId":"E32","evaluationId":"S1","correct":"1101101101100000100100010111100000010111"},{"studentId":"E33","evaluationId":"S1","correct":"1101100101100000000110110101000001010111"},{"studentId":"E34","evaluationId":"S1","correct":"1101111101111100100110110111101110110101"},{"studentId":"E35","evaluationId":"S1","correct":"1101101101100101100111110111100101010111"},{"studentId":"E01","evaluationId":"S2","correct":"01101111010011101000"},{"studentId":"E02","evaluationId":"S2","correct":"00101110101110101011"},{"studentId":"E03","evaluationId":"S2","correct":"01101111110010011011"},{"studentId":"E04","evaluationId":"S2","correct":"11101111111111111001"},{"studentId":"E05","evaluationId":"S2","correct":"00111110101011011001"},{"studentId":"E06","evaluationId":"S2","correct":"01101111100001101000"},{"studentId":"E07","evaluationId":"S2","correct":"00101011111011001001"},{"studentId":"E08","evaluationId":"S2","correct":"00101111100010111011"},{"studentId":"E09","evaluationId":"S2","correct":"00101010101000001001"},{"studentId":"E10","evaluationId":"S2","correct":"11101111111111111011"},{"studentId":"E11","evaluationId":"S2","correct":"00101010110010011011"},{"studentId":"E12","evaluationId":"S2","correct":"01111111101010001011"},{"studentId":"E13","evaluationId":"S2","correct":"01101111100010011011"},{"studentId":"E14","evaluationId":"S2","correct":"00101111011111111010"},{"studentId":"E15","evaluationId":"S2","correct":"11101111110111011011"},{"studentId":"E16","evaluationId":"S2","correct":"11101111111010011011"},{"studentId":"E17","evaluationId":"S2","correct":"01111000110110001000"},{"studentId":"E18","evaluationId":"S2","correct":"01101100100100001011"},{"studentId":"E19","evaluationId":"S2","correct":"10101111111111011011"},{"studentId":"E20","evaluationId":"S2","correct":"10101011110011011111"},{"studentId":"E21","evaluationId":"S2","correct":"01101011100011001000"},{"studentId":"E22","evaluationId":"S2","correct":"00101010101011011001"},{"studentId":"E23","evaluationId":"S2","correct":"00101010110011011010"},{"studentId":"E24","evaluationId":"S2","correct":"01101111110110111001"},{"studentId":"E25","evaluationId":"S2","correct":"00101111011010011001"},{"studentId":"E26","evaluationId":"S2","correct":"00101010100010111001"},{"studentId":"E27","evaluationId":"S2","correct":"11111111111011111001"},{"studentId":"E28","evaluationId":"S2","correct":"00101110110010111001"},{"studentId":"E29","evaluationId":"S2","correct":"01101111111010111011"},{"studentId":"E30","evaluationId":"S2","correct":"00101000111011101000"},{"studentId":"E31","evaluationId":"S2","correct":"00100110000010001000"},{"studentId":"E32","evaluationId":"S2","correct":"00101110101010101010"},{"studentId":"E33","evaluationId":"S2","correct":"00101011101010101001"},{"studentId":"E34","evaluationId":"S2","correct":"00101010100111011011"},{"studentId":"E35","evaluationId":"S2","correct":"00111111100010111111"},{"studentId":"E01","evaluationId":"S3","correct":"1011011010110111011111111111111011111101"},{"studentId":"E02","evaluationId":"S3","correct":"1101010011110110011011010011110111010111"},{"studentId":"E03","evaluationId":"S3","correct":"1111111101111111011110111111110011111101"},{"studentId":"E04","evaluationId":"S3","correct":"1111111111111111111111111111111111111111"},{"studentId":"E05","evaluationId":"S3","correct":"1111010111100111001100010101011111110101"},{"studentId":"E06","evaluationId":"S3","correct":"1011100111111110010100111101101011110100"},{"studentId":"E07","evaluationId":"S3","correct":"1011000111110110011000010100110111100101"},{"studentId":"E08","evaluationId":"S3","correct":"1111111101110110110110011111111011111101"},{"studentId":"E09","evaluationId":"S3","correct":"1011010001100110000000010101000011100101"},{"studentId":"E10","evaluationId":"S3","correct":"1111111101111111111111111111111111111101"},{"studentId":"E11","evaluationId":"S3","correct":"1011010101110110011011111101010111110101"},{"studentId":"E12","evaluationId":"S3","correct":"1111100011111110011011011101110111111101"},{"studentId":"E13","evaluationId":"S3","correct":"1011101110100110011011110011010111110100"},{"studentId":"E14","evaluationId":"S3","correct":"1111011011110111011111011101110111110111"},{"studentId":"E15","evaluationId":"S3","correct":"1011011011111110011011011101100111111101"},{"studentId":"E16","evaluationId":"S3","correct":"1011010101111110011110011111101111111101"},{"studentId":"E17","evaluationId":"S3","correct":"1011000011110110001010000111000011010001"},{"studentId":"E18","evaluationId":"S3","correct":"0011011111110110011011010101010111111001"},{"studentId":"E19","evaluationId":"S3","correct":"1111110111111110111111111111110111111101"},{"studentId":"E20","evaluationId":"S3","correct":"1011111111111111011111111111110111111111"},{"studentId":"E21","evaluationId":"S3","correct":"1011010011110110011011011010100011110111"},{"studentId":"E22","evaluationId":"S3","correct":"1001010001110110010110011111010111110101"},{"studentId":"E23","evaluationId":"S3","correct":"0111010001111110011010011101100111111111"},{"studentId":"E24","evaluationId":"S3","correct":"1111110101110110011111111111111111111111"},{"studentId":"E25","evaluationId":"S3","correct":"1111010010111111011010110111101111100111"},{"studentId":"E26","evaluationId":"S3","correct":"1011111001110111011010011111000111110101"},{"studentId":"E27","evaluationId":"S3","correct":"1011111111110110111111111101100111111111"},{"studentId":"E28","evaluationId":"S3","correct":"1111110101111110011111011111100111111101"},{"studentId":"E29","evaluationId":"S3","correct":"1111011111111110111111110101100111111111"},{"studentId":"E30","evaluationId":"S3","correct":"1001110000110010011001010101100111110001"},{"studentId":"E31","evaluationId":"S3","correct":"1001010011100110000000010100100111010100"},{"studentId":"E32","evaluationId":"S3","correct":"0011010101100111010010010001000111110101"},{"studentId":"E33","evaluationId":"S3","correct":"1101100011110110010110011101000111110100"},{"studentId":"E34","evaluationId":"S3","correct":"1011110100110110011110011101011111110101"},{"studentId":"E35","evaluationId":"S3","correct":"1101111111111111010011010111110111111101"}]}</script>
+<!-- DATA:END -->
+
+<script>
+"use strict";
+
+// === Configuración ===
+// Parámetros con nombre (plan §6.3). Fuera de este bloque no se escriben umbrales ni fechas.
+// Las notas se expresan en décimas: 40 = 4,0 (plan §6.1).
+const CONFIG = Object.freeze({
+  REFERENCE_DATE: "2026-10-27",
+  // Escala de notas (Constitución 6.1)
+  MIN_GRADE: 10,
+  PASSING_GRADE: 40,
+  MAX_GRADE: 70,
+  PASSING_PERCENT: 60,
+  // Niveles de logro (Constitución 6.2)
+  LEVEL_ELEMENTAL_PERCENT: 60,
+  LEVEL_ADEQUATE_PERCENT: 80,
+  // Semáforo (Constitución 6.3)
+  RISK_RECENT_WINDOW_MONTHS: 2,
+  RISK_RECENT_FAILS: 2,
+  RISK_DROP_POINTS: 20,
+  RISK_ABSENCES: 2,
+  // Cierre de calificaciones, como mes-día (Constitución 6.4)
+  SEMESTER_CLOSE: Object.freeze({ 1: "06-30", 2: "12-03" }),
+  // Tramos de la distribución de notas de una sumativa (HU-12), en décimas
+  GRADE_BANDS: Object.freeze([[10, 39], [40, 49], [50, 59], [60, 70]]),
+  // Supuestos S1–S3 de la spec
+  TOP_N: 5,
+  CRITICAL_QUESTION_PERCENT: 50,
+  COVERAGE_ALERT_DAYS: 45,
+});
+
+// === Reglas de dominio ===
+// Funciones puras de la Constitución, sección 6. No leen el DOM ni los datos globales:
+// reciben "registros" de un estudiante (uno por evaluación, ordenados por fecha):
+// { evaluationId, type, date, weight, score, maxScore, absent, objectives: [{ code, kind, score, maxScore, absent }] }
+
+const EVALUATION_TYPE = Object.freeze({ DIAGNOSTIC: "diagnostic", FORMATIVE: "formative", SUMMATIVE: "summative" });
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+/** Divide dos enteros positivos y redondea con 0,5 hacia arriba, como ROUND de Excel. */
+function roundHalfUpRatio(numerator, denominator) {
+  return Math.floor((2 * numerator + denominator) / (2 * denominator));
+}
+
+/** Convierte un puntaje a nota en décimas, con 60% de exigencia. Ej.: 8 de 10 → 55 (5,5). */
+function scoreToGrade(score, maxScore) {
+  const { MIN_GRADE: low, PASSING_GRADE: pass, MAX_GRADE: high, PASSING_PERCENT: threshold } = CONFIG;
+  if (100 * score < threshold * maxScore) {
+    return roundHalfUpRatio(low * threshold * maxScore + (pass - low) * 100 * score, threshold * maxScore);
+  }
+  return roundHalfUpRatio(
+    pass * (100 - threshold) * maxScore + (high - pass) * (100 * score - threshold * maxScore),
+    (100 - threshold) * maxScore,
+  );
+}
+
+/** Nivel de logro: insufficient (< 60%), elemental (60%–79,9%) o adequate (≥ 80%). */
+function achievementLevel(score, maxScore) {
+  if (100 * score < CONFIG.LEVEL_ELEMENTAL_PERCENT * maxScore) return "insufficient";
+  if (100 * score < CONFIG.LEVEL_ADEQUATE_PERCENT * maxScore) return "elemental";
+  return "adequate";
+}
+
+/** Promedio simple de notas en décimas; ignora los null. Sin notas → null. */
+function simpleAverage(grades) {
+  const values = grades.filter((grade) => grade !== null);
+  if (values.length === 0) return null;
+  return roundHalfUpRatio(values.reduce((sum, grade) => sum + grade, 0), values.length);
+}
+
+/** Promedio ponderado [{ grade, weight }], con los pesos reescalados entre las notas presentes. */
+function weightedAverage(items) {
+  const present = items.filter((item) => item.grade !== null);
+  const totalWeight = present.reduce((sum, item) => sum + item.weight, 0);
+  if (totalWeight === 0) return null;
+  return roundHalfUpRatio(present.reduce((sum, item) => sum + item.grade * item.weight, 0), totalWeight);
+}
+
+// --- Calendario (Constitución 6.4) ---
+
+function semesterOf(date) {
+  return date.slice(5) <= CONFIG.SEMESTER_CLOSE[1] ? 1 : 2;
+}
+
+function semesterCloseDate(year, semester) {
+  return `${year}-${CONFIG.SEMESTER_CLOSE[semester]}`;
+}
+
+function toUtc(date) {
+  const [year, month, day] = date.split("-").map(Number);
+  return Date.UTC(year, month - 1, day);
+}
+
+function daysBetween(from, to) {
+  return Math.round((toUtc(to) - toUtc(from)) / MS_PER_DAY);
+}
+
+/** Días corridos entre la fecha de referencia y el cierre del semestre en curso. */
+function daysToClose(refDate) {
+  return daysBetween(refDate, semesterCloseDate(Number(refDate.slice(0, 4)), semesterOf(refDate)));
+}
+
+/** Resta meses a una fecha ISO; si el día no existe en el mes de destino, usa el último día. */
+function subtractMonths(date, months) {
+  const [year, month, day] = date.split("-").map(Number);
+  const target = new Date(Date.UTC(year, month - 1 - months, 1));
+  const lastDay = new Date(Date.UTC(target.getUTCFullYear(), target.getUTCMonth() + 1, 0)).getUTCDate();
+  target.setUTCDate(Math.min(day, lastDay));
+  return target.toISOString().slice(0, 10);
+}
+
+/** Inicio de la ventana de "últimos 2 meses", inclusiva (Constitución 6.3 b, v5.0.1). */
+function recentWindowStart(refDate) {
+  return subtractMonths(refDate, CONFIG.RISK_RECENT_WINDOW_MONTHS);
+}
+
+/** Fecha hasta la que se evalúa un semestre: la de referencia o, si ya cerró, su cierre (D6). */
+function evaluationCutoff(semester, refDate) {
+  const close = semesterCloseDate(Number(refDate.slice(0, 4)), semester);
+  return refDate > close ? { date: close, closed: true } : { date: refDate, closed: false };
+}
+
+// --- Notas y promedios (Constitución 6.1) ---
+
+/** Nota de una evaluación con su puntaje total. Ausente → null. */
+function recordGrade(record) {
+  return record.absent ? null : scoreToGrade(record.score, record.maxScore);
+}
+
+function semesterRecords(records, semester, cutoffDate) {
+  return records.filter((record) => semesterOf(record.date) === semester && record.date <= cutoffDate);
+}
+
+/** Promedio de sumativas del semestre, con sus ponderaciones reescaladas. */
+function summativeAverage(records, semester, refDate) {
+  const { date } = evaluationCutoff(semester, refDate);
+  const summatives = semesterRecords(records, semester, date).filter((r) => r.type === EVALUATION_TYPE.SUMMATIVE);
+  return weightedAverage(summatives.map((r) => ({ grade: recordGrade(r), weight: r.weight })));
+}
+
+/** Promedio simple de [cada formativa, promedio de sumativas]. La diagnóstica no pesa. */
+function semesterAverage(records, semester, refDate) {
+  const { date } = evaluationCutoff(semester, refDate);
+  const formatives = semesterRecords(records, semester, date)
+    .filter((r) => r.type === EVALUATION_TYPE.FORMATIVE)
+    .map(recordGrade);
+  return simpleAverage([...formatives, summativeAverage(records, semester, refDate)]);
+}
+
+/** Nota de la evaluación diagnóstica (en la interfaz: "Diagnóstico"). */
+function baseline(records) {
+  const diagnostic = records.find((r) => r.type === EVALUATION_TYPE.DIAGNOSTIC);
+  return diagnostic ? recordGrade(diagnostic) : null;
+}
+
+/** Anual = promedio simple de los dos semestres ya redondeados; si falta uno, el otro. */
+function combineAnnual(firstSemester, secondSemester) {
+  return simpleAverage([firstSemester, secondSemester]);
+}
+
+function annualAverage(records, refDate) {
+  const close = semesterCloseDate(Number(refDate.slice(0, 4)), 2);
+  return {
+    grade: combineAnnual(semesterAverage(records, 1, refDate), semesterAverage(records, 2, refDate)),
+    partial: refDate < close,
+  };
+}
+
+// --- Semáforo (Constitución 6.3, v5.0.1) ---
+
+function percentDropReaches(previous, current, points) {
+  return 100 * (previous.score * current.maxScore - current.score * previous.maxScore)
+    >= points * previous.maxScore * current.maxScore;
+}
+
+/**
+ * Estado de riesgo de un estudiante en un semestre.
+ * Devuelve { status: red | yellow | green, average, closed, cutoffDate, reasons: [{ signal, … }] }.
+ * Se listan todas las señales que se cumplen, también cuando el estado es rojo (HU-07).
+ */
+function riskStatus(records, semester, refDate) {
+  const cutoff = evaluationCutoff(semester, refDate);
+  const inSemester = semesterRecords(records, semester, cutoff.date);
+  const reasons = [];
+
+  const average = semesterAverage(records, semester, refDate);
+  const isRed = average !== null && average < CONFIG.PASSING_GRADE;
+  if (isRed) reasons.push({ signal: "lowAverage", average });
+
+  // (a) Última sumativa rendida del semestre bajo 4,0.
+  const summatives = inSemester.filter((r) => r.type === EVALUATION_TYPE.SUMMATIVE && !r.absent);
+  const lastSummative = summatives[summatives.length - 1];
+  if (lastSummative && recordGrade(lastSummative) < CONFIG.PASSING_GRADE) {
+    reasons.push({ signal: "lastSummative", evaluationId: lastSummative.evaluationId, grade: recordGrade(lastSummative) });
+  }
+
+  // (b) Formativas o diagnósticas bajo 4,0 en la ventana inclusiva de los últimos meses.
+  const windowStart = recentWindowStart(cutoff.date);
+  const recentFails = records.filter((r) =>
+    r.type !== EVALUATION_TYPE.SUMMATIVE && !r.absent && r.date >= windowStart && r.date <= cutoff.date
+    && recordGrade(r) < CONFIG.PASSING_GRADE);
+  if (recentFails.length >= CONFIG.RISK_RECENT_FAILS) {
+    reasons.push({
+      signal: "recentFails",
+      evaluations: recentFails.map((r) => ({ evaluationId: r.evaluationId, type: r.type, objectives: r.objectives.map((o) => o.code) })),
+    });
+  }
+
+  // (c) Caída de % de logro entre evaluaciones rendidas consecutivas del año (cruza semestres);
+  // cuenta para el semestre al que pertenece la evaluación más reciente del par.
+  const sat = records.filter((r) => !r.absent && r.date <= cutoff.date);
+  for (let i = 1; i < sat.length; i++) {
+    const previous = sat[i - 1];
+    const current = sat[i];
+    if (semesterOf(current.date) !== semester) continue;
+    if (percentDropReaches(previous, current, CONFIG.RISK_DROP_POINTS)) {
+      reasons.push({
+        signal: "drop",
+        from: previous.evaluationId,
+        to: current.evaluationId,
+        points: 100 * (previous.score / previous.maxScore - current.score / current.maxScore),
+      });
+    }
+  }
+
+  // (d) Ausencias en el semestre.
+  const absences = inSemester.filter((r) => r.absent);
+  if (absences.length >= CONFIG.RISK_ABSENCES) {
+    reasons.push({ signal: "absences", count: absences.length, evaluationIds: absences.map((r) => r.evaluationId) });
+  }
+
+  const status = isRed ? "red" : reasons.length > 0 ? "yellow" : "green";
+  return { status, average, closed: cutoff.closed, cutoffDate: cutoff.date, reasons };
+}
+
+// --- Cobertura curricular y logro por OA (Constitución 6.4) ---
+
+/** Estado de un OA de conocimiento en el año: covered (en sumativa), worked (en otra) o notEvaluated. */
+function objectiveCoverage(evaluations, code, refDate) {
+  const measuring = evaluations.filter((e) => e.date <= refDate && e.objectives.some((o) => o.code === code));
+  if (measuring.some((e) => e.type === EVALUATION_TYPE.SUMMATIVE)) return "covered";
+  return measuring.length > 0 ? "worked" : "notEvaluated";
+}
+
+/**
+ * Logro acumulado de un estudiante en un OA durante un semestre (mapa de calor, D1).
+ * state: measured (con score, maxScore y level) | absent | notInSemester | notEvaluated (en el año).
+ */
+function objectiveAchievement(records, code, semester, refDate) {
+  const measuredInYear = records.some((r) => r.date <= refDate && r.objectives.some((o) => o.code === code));
+  if (!measuredInYear) return { state: "notEvaluated" };
+
+  const { date } = evaluationCutoff(semester, refDate);
+  const parts = semesterRecords(records, semester, date).flatMap((r) => r.objectives.filter((o) => o.code === code));
+  if (parts.length === 0) return { state: "notInSemester" };
+
+  return achievementOfParts(parts);
+}
+
+/** Logro acumulado de un estudiante en un OA durante todo el año, hasta la fecha (ficha del estudiante). */
+function yearObjectiveAchievement(records, code, refDate) {
+  const parts = records.filter((r) => r.date <= refDate).flatMap((r) => r.objectives.filter((o) => o.code === code));
+  if (parts.length === 0) return { state: "notEvaluated" };
+  return achievementOfParts(parts);
+}
+
+function achievementOfParts(parts) {
+  const sat = parts.filter((part) => !part.absent);
+  if (sat.length === 0) return { state: "absent" };
+
+  const score = sat.reduce((sum, part) => sum + part.score, 0);
+  const maxScore = sat.reduce((sum, part) => sum + part.maxScore, 0);
+  return { state: "measured", score, maxScore, level: achievementLevel(score, maxScore) };
+}
+
+/** Alerta de OA pendientes: se activa cuando quedan pocos días para el cierre (supuesto S3). */
+function coverageAlertActive(refDate) {
+  return daysToClose(refDate) <= CONFIG.COVERAGE_ALERT_DAYS;
+}
+
+// --- Análisis de sumativas (HU-12 a HU-15) ---
+
+/** Cantidad de notas en cada tramo de CONFIG.GRADE_BANDS. */
+function gradeDistribution(grades) {
+  return CONFIG.GRADE_BANDS.map(([from, to]) => ({ from, to, count: grades.filter((g) => g >= from && g <= to).length }));
+}
+
+/** Los N con mejor nota, más todos los empatados con el N-ésimo (supuesto S1). Recibe [{ grade, … }]. */
+function topWithTies(items, n) {
+  const sorted = [...items].sort((a, b) => b.grade - a.grade);
+  if (sorted.length <= n) return sorted;
+  const cutoff = sorted[n - 1].grade;
+  return sorted.filter((item) => item.grade >= cutoff);
+}
+
+/** Aciertos de una pregunta entre quienes rindieron; es crítica bajo CRITICAL_QUESTION_PERCENT (supuesto S2). */
+function questionStats(question, answers) {
+  const hits = answers.filter((answer) => answer.correct[question.number - 1] === "1").length;
+  return { hits, total: answers.length, critical: 100 * hits < CONFIG.CRITICAL_QUESTION_PERCENT * answers.length };
+}
+
+// === Datos ===
+// Lectura del JSON embebido, índices y armado de los registros por estudiante.
+function loadData() {
+  const raw = JSON.parse(document.getElementById("mockup-data").textContent);
+  if (!raw.students) throw new Error("No hay datos embebidos: ejecuta mockup/scripts/extract-data.ps1");
+
+  const byId = (items) => new Map(items.map((item) => [item.id, item]));
+  const groupBy = (items, key) => {
+    const groups = new Map();
+    for (const item of items) {
+      if (!groups.has(item[key])) groups.set(item[key], []);
+      groups.get(item[key]).push(item);
+    }
+    return groups;
+  };
+
+  // La planilla trae el nombre completo; se separa en nombre (primera palabra) y apellido (el resto).
+  // La plataforma real entrega ambos campos por separado.
+  const students = raw.students.map((student) => {
+    const [firstName, ...lastNames] = student.name.split(" ");
+    return { ...student, firstName, lastName: lastNames.join(" ") };
+  });
+  const evaluations = [...raw.evaluations].sort((a, b) => a.date.localeCompare(b.date));
+  return {
+    meta: raw.meta,
+    students,
+    objectives: raw.objectives,
+    evaluations,
+    results: raw.results,
+    questions: raw.questions,
+    answers: raw.answers,
+    studentById: byId(students),
+    evaluationById: byId(evaluations),
+    objectiveByCode: new Map(raw.objectives.map((o) => [o.code, o])),
+    resultsByStudent: groupBy(raw.results, "studentId"),
+    resultsByEvaluation: groupBy(raw.results, "evaluationId"),
+    resultsByObjective: groupBy(raw.results, "objective"),
+    questionsByEvaluation: groupBy(raw.questions, "evaluationId"),
+    answersByEvaluation: groupBy(raw.answers, "evaluationId"),
+  };
+}
+
+/** Registros de un estudiante, uno por evaluación, en orden de fecha. Solo desempeño evaluativo. */
+function studentRecords(data, studentId) {
+  const results = data.resultsByStudent.get(studentId) || [];
+  return data.evaluations.map((evaluation) => {
+    const parts = results.filter((r) => r.evaluationId === evaluation.id);
+    const objectives = parts.map((r) => ({
+      code: r.objective,
+      kind: data.objectiveByCode.get(r.objective).kind,
+      score: r.score,
+      maxScore: r.maxScore,
+      absent: r.absent,
+    }));
+    const absent = objectives.every((o) => o.absent);
+    return {
+      evaluationId: evaluation.id,
+      type: evaluation.type,
+      date: evaluation.date,
+      weight: evaluation.weight,
+      score: absent ? null : objectives.reduce((sum, o) => sum + o.score, 0),
+      maxScore: objectives.reduce((sum, o) => sum + o.maxScore, 0),
+      absent,
+      objectives,
+    };
+  });
+}
+
+// === Formato es-CL ===
+
+const LEVEL_LABEL = Object.freeze({ insufficient: "Insuficiente", elemental: "Elemental", adequate: "Adecuado" });
+const RISK_LABEL = Object.freeze({ red: "En riesgo", yellow: "Alerta", green: "Sin alerta" });
+const TYPE_LABEL = Object.freeze({ diagnostic: "diagnóstica", formative: "formativa", summative: "sumativa" });
+
+/** Nota en décimas → "4,6". Sin nota → "Sin notas". */
+function formatGrade(grade) {
+  return grade === null ? "Sin notas" : (grade / 10).toFixed(1).replace(".", ",");
+}
+
+/** Nota de una evaluación: "Ausente" si no la rindió. */
+function formatRecordGrade(record) {
+  return record.absent ? "Ausente" : formatGrade(recordGrade(record));
+}
+
+/** Fracción 0–1 → "62,5%". */
+function formatPercent(fraction) {
+  return `${(Math.round(fraction * 1000) / 10).toFixed(1).replace(".", ",")}%`;
+}
+
+/** "2026-10-27" → "27-10-2026". */
+function formatDate(isoDate) {
+  return isoDate.split("-").reverse().join("-");
+}
+
+function plural(count, singular, pluralForm) {
+  return `${count} ${count === 1 ? singular : pluralForm}`;
+}
+
+/** Texto del motivo de una alerta (HU-07). */
+function describeReason(reason) {
+  switch (reason.signal) {
+    case "lowAverage":
+      return `Promedio semestral ${formatGrade(reason.average)} (bajo ${formatGrade(CONFIG.PASSING_GRADE)})`;
+    case "lastSummative":
+      return `Última sumativa (${reason.evaluationId}) con ${formatGrade(reason.grade)}`;
+    case "recentFails": {
+      const types = new Set(reason.evaluations.map((e) => e.type));
+      const noun = types.size === 1 && types.has(EVALUATION_TYPE.FORMATIVE) ? ["formativa", "formativas"] : ["evaluación", "evaluaciones"];
+      const objectives = [...new Set(reason.evaluations.flatMap((e) => e.objectives))].join(", ");
+      return `${plural(reason.evaluations.length, ...noun)} Insuficiente en los últimos ${CONFIG.RISK_RECENT_WINDOW_MONTHS} meses (${objectives})`;
+    }
+    case "drop":
+      return `Caída de ${Math.round(reason.points)} puntos de logro (${reason.from} → ${reason.to})`;
+    case "absences":
+      return `${plural(reason.count, "ausencia", "ausencias")} en el semestre (${reason.evaluationIds.join(", ")})`;
+    default:
+      return reason.signal;
+  }
+}
+
+// === Vistas ===
+// Construyen el DOM con nodos (nunca innerHTML con datos) y solo llaman a funciones de dominio.
+
+const RISK_ORDER = Object.freeze({ red: 0, yellow: 1, green: 2 });
+const RISK_ICON = Object.freeze({ red: "🔴", yellow: "🟡", green: "🟢" });
+const COVERAGE_LABEL = Object.freeze({ covered: "Cubierto", worked: "Trabajado", notEvaluated: "Sin evaluar" });
+const COVERAGE_ICON = Object.freeze({ covered: "✔", worked: "◐", notEvaluated: "○" });
+const TYPE_SYMBOL = Object.freeze({ diagnostic: "■", formative: "●", summative: "◆" });
+const MONTH_SHORT = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+const WEEKDAY_SHORT = ["Lun", "Mar", "Mié", "Jue", "Vie"];
+const SVG_NS = "http://www.w3.org/2000/svg";
+
+const TABS = Object.freeze([
+  { id: "summary", label: "Resumen", render: renderSummary },
+  { id: "students", label: "Estudiantes", render: renderStudents },
+  { id: "heatmap", label: "Mapa de calor", render: renderHeatmap },
+  { id: "summatives", label: "Sumativas", render: renderSummatives },
+  { id: "curriculum", label: "Avance curricular", render: renderCurriculum },
+  { id: "week", label: "Mi semana", render: renderWeek },
+]);
+
+// Contenido escrito a mano para la maqueta de HU-21 ("Vista previa"). No viene de una IA.
+const ACTIVITY_PREVIEWS = Object.freeze({
+  "CN1M OA 17": [
+    ["Bitácora de reacciones cotidianas", "En parejas registran tres cambios de su casa (cocinar, oxidación, efervescencia) e identifican reactivos, productos y evidencias."],
+    ["Estaciones de evidencias", "Cuatro estaciones breves (cambio de color, gas, precipitado, temperatura); el curso clasifica cada caso como cambio físico o químico."],
+  ],
+  "CN1M OA 18": [
+    ["Balance con modelos", "Con plasticina o fichas de colores arman reactivos y productos y comprueban que el número de átomos se conserva."],
+    ["Masa en sistema cerrado", "Demostración de vinagre y bicarbonato en una bolsa sellada sobre la balanza; se discute por qué la masa no cambia."],
+    ["Error frecuente: coeficientes y subíndices", "Ejercicios guiados donde detectan ecuaciones \"balanceadas\" cambiando subíndices y las corrigen."],
+  ],
+  "CN1M OA 20": [
+    ["Receta estequiométrica", "Escalan una receta (por ejemplo, de panqueques) para conectar proporciones con relaciones mol a mol."],
+    ["Carrera de conversiones", "Tarjetas con conversiones masa–mol–partículas resueltas en equipos; cada error se discute en voz alta."],
+    ["Reactivo limitante con material concreto", "Con piezas para armar \"moléculas\" descubren qué reactivo se agota primero y cuánto producto se obtiene."],
+  ],
+});
+
+// Evaluaciones de ejemplo para la maqueta de HU-22 ("Próximamente"). Ficticias.
+const WEEK_EXAMPLES = Object.freeze([
+  { date: "2026-10-28", course: "1° Medio B", type: "formative", name: "Ticket de salida: reactivo limitante", objectives: ["CN1M OA 20"] },
+  { date: "2026-10-30", course: "1° Medio A", type: "formative", name: "Quiz: compuestos binarios", objectives: ["CN1M OA 19"] },
+  { date: "2026-11-04", course: "1° Medio B", type: "formative", name: "Quiz: compuestos binarios", objectives: ["CN1M OA 19"] },
+  { date: "2026-11-06", course: "1° Medio A", type: "formative", name: "Ticket de salida: nomenclatura ternaria", objectives: ["CN1M OA 19"] },
+  { date: "2026-11-12", course: "1° Medio A", type: "summative", name: "Prueba Unidad 4: compuestos inorgánicos", objectives: ["CN1M OA 19"] },
+  { date: "2026-11-13", course: "1° Medio B", type: "summative", name: "Prueba Unidad 4: compuestos inorgánicos", objectives: ["CN1M OA 19"] },
+  { date: "2026-11-19", course: "1° Medio A", type: "formative", name: "Quiz: repaso de estequiometría", objectives: ["CN1M OA 20"] },
+  { date: "2026-11-25", course: "1° Medio B", type: "formative", name: "Ticket de salida: repaso general", objectives: ["CN1M OA 17", "CN1M OA 18"] },
+  { date: "2026-12-01", course: "1° Medio A", type: "summative", name: "Prueba global de química", objectives: ["CN1M OA 17", "CN1M OA 18", "CN1M OA 19", "CN1M OA 20"] },
+  { date: "2026-12-02", course: "1° Medio B", type: "summative", name: "Prueba global de química", objectives: ["CN1M OA 17", "CN1M OA 18", "CN1M OA 19", "CN1M OA 20"] },
+]);
+const WEEK_STARTS = Object.freeze(["2026-10-26", "2026-11-02", "2026-11-09", "2026-11-16", "2026-11-23", "2026-11-30"]);
+
+const state = {
+  semester: semesterOf(CONFIG.REFERENCE_DATE),
+  tab: "summary",
+  riskFilter: "all",
+  sort: "risk",
+  summativeId: null,
+  openObjective: null,
+  weekIndex: 0,
+};
+let DATA = null;
+const modelCache = new Map();
+
+// --- Utilidades de DOM ---
+
+function h(tag, attrs = {}, ...children) {
+  const element = document.createElement(tag);
+  for (const [key, value] of Object.entries(attrs)) {
+    if (value === null || value === undefined || value === false) continue;
+    if (key === "class") element.className = value;
+    else if (key.startsWith("on")) element.addEventListener(key.slice(2), value);
+    else element.setAttribute(key, value === true ? "" : value);
+  }
+  element.append(...children.flat(Infinity).filter((child) => child !== null && child !== undefined && child !== false));
+  return element;
+}
+
+function svgNode(tag, attrs = {}, ...children) {
+  const element = document.createElementNS(SVG_NS, tag);
+  for (const [key, value] of Object.entries(attrs)) {
+    if (value !== null && value !== undefined) element.setAttribute(key, value);
+  }
+  element.append(...children.flat(Infinity).filter((child) => child !== null && child !== undefined));
+  return element;
+}
+
+function addDays(date, days) {
+  return new Date(toUtc(date) + days * MS_PER_DAY).toISOString().slice(0, 10);
+}
+
+function semesterLabel(semester) {
+  return `${semester}° semestre`;
+}
+
+function referenceYear() {
+  return Number(CONFIG.REFERENCE_DATE.slice(0, 4));
+}
+
+// --- Modelo por semestre ---
+
+function buildModel(semester) {
+  if (modelCache.has(semester)) return modelCache.get(semester);
+  const ref = CONFIG.REFERENCE_DATE;
+  const rows = DATA.students.map((student) => {
+    const records = studentRecords(DATA, student.id);
+    return {
+      student,
+      records,
+      risk: riskStatus(records, semester, ref),
+      semesterAverage: semesterAverage(records, semester, ref),
+      annual: annualAverage(records, ref),
+      baseline: baseline(records),
+    };
+  });
+  const counts = { red: 0, yellow: 0, green: 0 };
+  for (const row of rows) counts[row.risk.status]++;
+  const model = {
+    semester,
+    rows,
+    counts,
+    cutoff: evaluationCutoff(semester, ref),
+    rowById: new Map(rows.map((row) => [row.student.id, row])),
+    courseSemesterAverage: simpleAverage(rows.map((row) => row.semesterAverage)),
+    courseAnnual: { grade: simpleAverage(rows.map((row) => row.annual.grade)), partial: rows.some((row) => row.annual.partial) },
+  };
+  modelCache.set(semester, model);
+  return model;
+}
+
+function compareGradesAscending(a, b) {
+  if (a === b) return 0;
+  if (a === null) return 1;
+  if (b === null) return -1;
+  return a - b;
+}
+
+/** Orden de la lista: por riesgo (rojo → amarillo → verde, luego promedio), por promedio o por nombre. Nunca por PIE. */
+function sortRows(rows, mode) {
+  const byName = (a, b) => a.student.name.localeCompare(b.student.name, "es");
+  const byAverage = (a, b) => compareGradesAscending(a.semesterAverage, b.semesterAverage);
+  const byRisk = (a, b) => RISK_ORDER[a.risk.status] - RISK_ORDER[b.risk.status];
+  const comparators = { name: [byName], average: [byAverage, byName], risk: [byRisk, byAverage, byName] }[mode];
+  return [...rows].sort((a, b) => {
+    for (const compare of comparators) {
+      const result = compare(a, b);
+      if (result) return result;
+    }
+    return 0;
+  });
+}
+
+/** Logro conjunto de varios estudiantes: suma de puntajes de quienes tienen resultado. */
+function pooledAchievement(achievements) {
+  const measured = achievements.filter((a) => a.state === "measured");
+  if (measured.length === 0) return null;
+  const score = measured.reduce((sum, a) => sum + a.score, 0);
+  const maxScore = measured.reduce((sum, a) => sum + a.maxScore, 0);
+  return { state: "measured", score, maxScore, level: achievementLevel(score, maxScore) };
+}
+
+function knowledgeObjectives() {
+  return DATA.objectives.filter((o) => o.kind === "knowledge");
+}
+
+function coverageSummary() {
+  const ref = CONFIG.REFERENCE_DATE;
+  const items = knowledgeObjectives().map((objective) => ({ objective, coverage: objectiveCoverage(DATA.evaluations, objective.code, ref) }));
+  return {
+    items,
+    covered: items.filter((i) => i.coverage === "covered").length,
+    worked: items.filter((i) => i.coverage === "worked").length,
+    pending: items.filter((i) => i.coverage === "notEvaluated"),
+  };
+}
+
+function closingText() {
+  const ref = CONFIG.REFERENCE_DATE;
+  const semester = semesterOf(ref);
+  return `Quedan ${plural(daysToClose(ref), "día", "días")} para el cierre del ${semesterLabel(semester)} ` +
+    `(${formatDate(semesterCloseDate(referenceYear(), semester))})`;
+}
+
+// --- Componentes ---
+
+function riskBadge(status) {
+  return h("span", { class: `risk risk-${status}` }, h("span", { "aria-hidden": "true" }, RISK_ICON[status]), RISK_LABEL[status]);
+}
+
+function pieTag(student) {
+  return student.pie ? h("span", { class: "tag tag-pie", title: "Programa de Integración Escolar" }, "PIE") : null;
+}
+
+function skillTag(code) {
+  return DATA.objectiveByCode.get(code)?.kind === "skill" ? h("span", { class: "tag tag-skill" }, "Habilidad") : null;
+}
+
+function typeTag(type) {
+  return h("span", { class: `tag tag-type type-${type}` }, h("span", { "aria-hidden": "true" }, `${TYPE_SYMBOL[type]} `), TYPE_LABEL[type]);
+}
+
+function levelTag(level) {
+  return h("span", { class: `tag level-${level}` }, LEVEL_LABEL[level]);
+}
+
+function studentLink(student) {
+  return h("button", { type: "button", class: "link", onclick: () => openStudent(student.id) }, student.name);
+}
+
+function panel(title, ...children) {
+  return h("section", { class: "panel" }, h("h2", {}, title), ...children);
+}
+
+function card(label, value, detail, onclick) {
+  return h(onclick ? "button" : "div", { class: "card", type: onclick ? "button" : null, onclick },
+    h("span", { class: "card-label" }, label),
+    h("span", { class: "card-value" }, value),
+    detail ? h("span", { class: "card-detail" }, detail) : null);
+}
+
+function bar(score, maxScore, level, label) {
+  const fraction = score / maxScore;
+  return h("div", { class: "bar-row" },
+    h("div", { class: "bar", role: "img", "aria-label": `${label}: ${formatPercent(fraction)}, ${LEVEL_LABEL[level]}` },
+      h("div", { class: `bar-fill level-${level}`, style: `width:${(100 * fraction).toFixed(1)}%` })),
+    h("span", { class: "bar-value" }, `${formatPercent(fraction)} · ${LEVEL_LABEL[level]}`));
+}
+
+function closedNotice(model) {
+  if (!model.cutoff.closed) return null;
+  return h("p", { class: "notice notice-info" },
+    `Estado al cierre del ${semesterLabel(model.semester)} (${formatDate(model.cutoff.date)}).`);
+}
+
+function coverageAlerts() {
+  if (!coverageAlertActive(CONFIG.REFERENCE_DATE)) return [];
+  return coverageSummary().pending.map(({ objective }) => h("p", { class: "notice notice-alert", role: "status" },
+    h("span", { "aria-hidden": "true" }, "⚠ "), `${objective.code} aún no ha sido evaluado. ${closingText()}.`));
+}
+
+// --- Libro de clases: una fila por estudiante y una columna por evaluación del semestre ---
+
+function gradeCell(record) {
+  if (record.absent) return h("td", { class: "num grade-absent" }, "Ausente");
+  const grade = recordGrade(record);
+  return h("td", { class: `num${grade < CONFIG.PASSING_GRADE ? " grade-fail" : ""}` }, formatGrade(grade));
+}
+
+function gradebookTable(model, rows) {
+  const evaluations = DATA.evaluations.filter((e) =>
+    e.type !== EVALUATION_TYPE.DIAGNOSTIC && semesterOf(e.date) === model.semester && e.date <= model.cutoff.date);
+  const head = h("tr", {},
+    ["ID", "Nombre", "Apellido", "Estado"].map((title) => h("th", { scope: "col" }, title)),
+    h("th", { scope: "col", class: "num", title: "Nota de la evaluación diagnóstica. No pesa en los promedios." }, "Diagnóstico"),
+    evaluations.map((e) => h("th", { scope: "col", class: "num", title: `${e.name} · ${formatDate(e.date)}` },
+      e.id, h("span", { class: "col-sub" }, `${TYPE_LABEL[e.type]} · ${formatDate(e.date).slice(0, 5)}`))),
+    h("th", { scope: "col", class: "num" }, "Promedio", h("span", { class: "col-sub" }, semesterLabel(model.semester))),
+    h("th", { scope: "col", class: "num" }, "Promedio", h("span", { class: "col-sub" }, "anual")),
+    h("th", { scope: "col" }, "Motivos"));
+
+  const body = rows.map((row) => h("tr", {},
+    h("td", { class: "muted" }, row.student.id),
+    h("td", {}, h("button", { type: "button", class: "link", onclick: () => openStudent(row.student.id) }, row.student.firstName), pieTag(row.student)),
+    h("td", {}, row.student.lastName),
+    h("td", {}, riskBadge(row.risk.status)),
+    h("td", { class: "num" }, formatGrade(row.baseline)),
+    evaluations.map((e) => gradeCell(row.records.find((r) => r.evaluationId === e.id))),
+    h("td", { class: `num strong${row.semesterAverage !== null && row.semesterAverage < CONFIG.PASSING_GRADE ? " grade-fail" : ""}` },
+      formatGrade(row.semesterAverage)),
+    h("td", { class: "num" }, formatGrade(row.annual.grade), row.annual.partial ? h("span", { class: "col-sub" }, "parcial") : null),
+    h("td", { class: "small" }, h("ul", { class: "reasons" }, row.risk.reasons.map((reason) => h("li", {}, describeReason(reason)))))));
+
+  return [
+    h("div", { class: "table-wrap" }, h("table", { class: "data gradebook" },
+      h("caption", { class: "sr-only" }, `Estudiantes que requieren atención, con sus notas del ${semesterLabel(model.semester)}`),
+      h("thead", {}, head),
+      h("tbody", {}, body))),
+    h("p", { class: "muted small" }, `Notas bajo ${formatGrade(CONFIG.PASSING_GRADE)} en rojo. ` +
+      "El diagnóstico no pesa en los promedios. Haz clic en el nombre para abrir la ficha."),
+  ];
+}
+
+// --- Resumen (HU-04, HU-05, HU-18) ---
+
+function renderSummary(model) {
+  const ref = CONFIG.REFERENCE_DATE;
+  const coverage = coverageSummary();
+  const currentSemester = semesterOf(ref);
+  const riskCounts = h("span", { class: "risk-counts" }, ["red", "yellow", "green"].map((status) =>
+    h("span", {}, h("span", { "aria-hidden": "true" }, `${RISK_ICON[status]} `), `${model.counts[status]} ${RISK_LABEL[status]}`)));
+
+  const cards = h("div", { class: "cards" },
+    card(`Promedio del curso · ${semesterLabel(model.semester)}`, formatGrade(model.courseSemesterAverage),
+      "El diagnóstico no pesa en el promedio"),
+    card("Promedio anual del curso", formatGrade(model.courseAnnual.grade),
+      model.courseAnnual.partial ? "Parcial: el 2° semestre está en curso" : "Año cerrado"),
+    card("Semáforo de riesgo", riskCounts, "Ver la lista de estudiantes", () => goTo("students", { riskFilter: "all" })),
+    card("OA de conocimiento cubiertos", `${coverage.covered} de ${coverage.items.length}`,
+      `${coverage.worked} trabajados · ${coverage.pending.length} sin evaluar`, () => goTo("curriculum")),
+    card("Días al cierre", String(daysToClose(ref)),
+      `Cierre del ${semesterLabel(currentSemester)}: ${formatDate(semesterCloseDate(referenceYear(), currentSemester))}`));
+
+  const attention = sortRows(model.rows.filter((row) => row.risk.status !== "green"), "risk");
+  const list = attention.length
+    ? gradebookTable(model, attention)
+    : h("p", { class: "muted" }, "Ningún estudiante requiere atención en este semestre.");
+
+  return [closedNotice(model), ...coverageAlerts(), cards, panel(`Requieren atención (${attention.length})`, list)];
+}
+
+// --- Estudiantes (HU-06 a HU-09) ---
+
+function renderStudents(model) {
+  const filters = ["all", "red", "yellow", "green"].map((status) => h("button", {
+    type: "button",
+    class: "chip",
+    "data-focus": `filter-${status}`,
+    "aria-pressed": String(state.riskFilter === status),
+    onclick: () => { state.riskFilter = status; render(); },
+  }, status === "all"
+    ? `Todos (${model.rows.length})`
+    : [h("span", { "aria-hidden": "true" }, `${RISK_ICON[status]} `), `${RISK_LABEL[status]} (${model.counts[status]})`]));
+
+  const sortSelect = h("select", { "data-focus": "sort", onchange: (event) => { state.sort = event.target.value; render(); } },
+    [["risk", "Riesgo (rojo primero)"], ["average", "Promedio semestral (menor primero)"], ["name", "Nombre"]]
+      .map(([value, label]) => h("option", { value, selected: state.sort === value }, label)));
+
+  const rows = sortRows(model.rows.filter((row) => state.riskFilter === "all" || row.risk.status === state.riskFilter), state.sort);
+  const table = h("table", { class: "data" },
+    h("caption", { class: "sr-only" }, `Estudiantes con su semáforo de riesgo, ${semesterLabel(model.semester)}`),
+    h("thead", {}, h("tr", {}, ["Estado", "Estudiante", "Motivos", "Diagnóstico", `Promedio ${semesterLabel(model.semester)}`, "Promedio anual"]
+      .map((title, i) => h("th", { scope: "col", class: i >= 3 ? "num" : null }, title)))),
+    h("tbody", {}, rows.map((row) => h("tr", {},
+      h("td", {}, riskBadge(row.risk.status)),
+      h("td", {}, studentLink(row.student), pieTag(row.student)),
+      h("td", {}, row.risk.reasons.length
+        ? h("ul", { class: "reasons" }, row.risk.reasons.map((reason) => h("li", {}, describeReason(reason))))
+        : h("span", { class: "muted" }, "—")),
+      h("td", { class: "num" }, formatGrade(row.baseline)),
+      h("td", { class: "num" }, formatGrade(row.semesterAverage)),
+      h("td", { class: "num" }, formatGrade(row.annual.grade), row.annual.partial ? h("span", { class: "muted small" }, " parcial") : null)))));
+
+  return [
+    closedNotice(model),
+    h("div", { class: "toolbar" },
+      h("div", { class: "chips", role: "group", "aria-label": "Filtrar por estado del semáforo" }, filters),
+      h("label", {}, "Ordenar por ", sortSelect)),
+    h("p", { class: "muted small" }, `Mostrando ${rows.length} de ${model.rows.length} estudiantes. ` +
+      "La marca PIE es solo contexto: no se usa para filtrar, ordenar ni calcular el semáforo."),
+    h("div", { class: "table-wrap" }, table),
+  ];
+}
+
+// --- Mapa de calor (HU-10, D1) ---
+
+function heatCell(achievement) {
+  switch (achievement.state) {
+    case "measured":
+      return h("td", { class: `heat level-${achievement.level}` },
+        h("span", { class: "heat-value" }, formatPercent(achievement.score / achievement.maxScore)),
+        h("span", { class: "heat-label" }, LEVEL_LABEL[achievement.level]));
+    case "absent":
+      return h("td", { class: "heat heat-absent" }, "Ausente");
+    case "notInSemester":
+      return h("td", { class: "heat heat-na" }, "No evaluado en este semestre");
+    default:
+      return h("td", { class: "heat heat-never" }, "Sin evaluar en el año");
+  }
+}
+
+function levelRangeText(level) {
+  const elemental = CONFIG.LEVEL_ELEMENTAL_PERCENT;
+  const adequate = CONFIG.LEVEL_ADEQUATE_PERCENT;
+  if (level === "insufficient") return `menos de ${elemental}%`;
+  if (level === "elemental") return `${elemental}% a ${formatPercent((adequate - 0.1) / 100)}`;
+  return `${adequate}% o más`;
+}
+
+function renderHeatmap(model) {
+  const ref = CONFIG.REFERENCE_DATE;
+  const objectives = knowledgeObjectives();
+  const rows = sortRows(model.rows, "risk");
+  const cells = rows.map((row) => objectives.map((o) => objectiveAchievement(row.records, o.code, model.semester, ref)));
+
+  const courseCells = objectives.map((o, j) => {
+    const column = cells.map((rowCells) => rowCells[j]);
+    return heatCell(pooledAchievement(column) ?? column[0]);
+  });
+
+  const table = h("table", { class: "data heatmap" },
+    h("caption", { class: "sr-only" }, `Logro por estudiante y OA, ${semesterLabel(model.semester)}`),
+    h("thead", {}, h("tr", {},
+      h("th", { scope: "col" }, "Estado"),
+      h("th", { scope: "col" }, "Estudiante"),
+      objectives.map((o) => h("th", { scope: "col", title: o.text }, h("abbr", { title: o.text }, o.code))))),
+    h("tbody", {},
+      rows.map((row, i) => h("tr", {},
+        h("td", {}, riskBadge(row.risk.status)),
+        h("th", { scope: "row" }, studentLink(row.student), pieTag(row.student)),
+        cells[i].map(heatCell))),
+      h("tr", { class: "course-row" }, h("td", {}), h("th", { scope: "row" }, "Promedio del curso"), courseCells)));
+
+  const legend = h("div", { class: "legend", "aria-label": "Leyenda" },
+    ["insufficient", "elemental", "adequate"].map((level) =>
+      h("span", { class: `legend-item level-${level}` }, `${LEVEL_LABEL[level]}: ${levelRangeText(level)}`)),
+    h("span", { class: "legend-item heat-absent" }, "Ausente"),
+    h("span", { class: "legend-item heat-na" }, "No evaluado en este semestre"),
+    h("span", { class: "legend-item heat-never" }, "Sin evaluar en el año"));
+
+  return [
+    closedNotice(model),
+    h("p", { class: "muted" }, `% de logro acumulado en todas las evaluaciones del ${semesterLabel(model.semester)} ` +
+      "(diagnósticas, formativas y sumativas). Pasa el cursor sobre un código para ver el OA oficial. Las habilidades no se muestran."),
+    legend,
+    h("div", { class: "table-wrap" }, table),
+  ];
+}
+
+// --- Sumativas (HU-12 a HU-16, D2) ---
+
+function weakestObjective(record) {
+  return record.objectives
+    .filter((o) => !o.absent)
+    .reduce((lowest, o) => (!lowest || o.score * lowest.maxScore < lowest.score * o.maxScore ? o : lowest), null);
+}
+
+function renderSummatives(model) {
+  const ref = CONFIG.REFERENCE_DATE;
+  const summatives = DATA.evaluations.filter((e) => e.type === EVALUATION_TYPE.SUMMATIVE && e.date <= ref);
+  const inSemester = summatives.filter((e) => semesterOf(e.date) === model.semester);
+  const selected = DATA.evaluationById.get(state.summativeId) ?? inSemester[inSemester.length - 1] ?? summatives[summatives.length - 1];
+  if (!selected) return [h("p", { class: "notice" }, "Aún no hay sumativas rendidas.")];
+
+  const selector = h("div", { class: "chips", role: "group", "aria-label": "Elegir sumativa" }, summatives.map((e) => h("button", {
+    type: "button",
+    class: "chip",
+    "data-focus": `summative-${e.id}`,
+    "aria-pressed": String(e.id === selected.id),
+    onclick: () => { state.summativeId = e.id; render(); },
+  }, `${e.id} · ${formatDate(e.date)}`)));
+
+  const entries = model.rows.map((row) => ({ row, record: row.records.find((r) => r.evaluationId === selected.id) }));
+  const graded = entries.filter((e) => !e.record.absent).map((e) => ({ ...e, grade: recordGrade(e.record) }));
+  const byName = (a, b) => a.row.student.name.localeCompare(b.row.student.name, "es");
+  const failed = graded.filter((e) => e.grade < CONFIG.PASSING_GRADE).sort((a, b) => a.grade - b.grade || byName(a, b));
+  const absentCount = entries.length - graded.length;
+
+  const title = h("div", { class: "eval-title" },
+    h("h2", {}, `${selected.id} · ${selected.name}`),
+    h("p", { class: "muted" }, `${formatDate(selected.date)} · ${selected.instrument} · Ponderación ${selected.weight}% · Mide `,
+      selected.objectives.map((o, i) => [i ? ", " : "", o.code, skillTag(o.code)])));
+
+  const overview = h("div", { class: "cards" },
+    card("Promedio del curso", formatGrade(simpleAverage(graded.map((e) => e.grade)))),
+    card("Aprobados", String(graded.length - failed.length), `Nota ${formatGrade(CONFIG.PASSING_GRADE)} o más`),
+    card("Reprobados", String(failed.length), `Nota bajo ${formatGrade(CONFIG.PASSING_GRADE)}`),
+    card("Ausentes", String(absentCount)));
+
+  const distribution = gradeDistribution(graded.map((e) => e.grade));
+  const maxCount = Math.max(1, ...distribution.map((band) => band.count));
+  const distributionChart = h("div", { class: "distribution" }, distribution.map((band) => {
+    const range = `${formatGrade(band.from)}–${formatGrade(band.to)}`;
+    return h("div", { class: "bar-row" },
+      h("span", { class: "bar-value" }, range),
+      h("div", { class: "bar", role: "img", "aria-label": `${range}: ${plural(band.count, "estudiante", "estudiantes")}` },
+        h("div", {
+          class: `bar-fill ${band.to < CONFIG.PASSING_GRADE ? "level-insufficient" : "bar-neutral"}`,
+          style: `width:${((100 * band.count) / maxCount).toFixed(1)}%`,
+        })),
+      h("span", { class: "bar-value" }, plural(band.count, "estudiante", "estudiantes")));
+  }));
+
+  const objectiveBars = selected.objectives.map((o) => {
+    const parts = graded.flatMap((e) => e.record.objectives.filter((part) => part.code === o.code && !part.absent));
+    const score = parts.reduce((sum, part) => sum + part.score, 0);
+    const maxScore = parts.reduce((sum, part) => sum + part.maxScore, 0);
+    return h("div", { class: "objective-bar" },
+      h("div", {}, h("strong", {}, o.code), skillTag(o.code)),
+      maxScore ? bar(score, maxScore, achievementLevel(score, maxScore), o.code) : h("span", { class: "muted" }, "Sin datos"));
+  });
+
+  const failedTable = failed.length
+    ? h("div", { class: "table-wrap" }, h("table", { class: "data" },
+      h("thead", {}, h("tr", {}, h("th", { scope: "col" }, "Estudiante"), h("th", { scope: "col", class: "num" }, "Nota"), h("th", { scope: "col" }, "OA más débil"))),
+      h("tbody", {}, failed.map((e) => {
+        const weakest = weakestObjective(e.record);
+        return h("tr", {},
+          h("td", {}, studentLink(e.row.student), pieTag(e.row.student)),
+          h("td", { class: "num" }, formatGrade(e.grade)),
+          h("td", {}, weakest ? [weakest.code, skillTag(weakest.code), ` · ${formatPercent(weakest.score / weakest.maxScore)}`] : "—"));
+      }))))
+    : h("p", { class: "muted" }, "Nadie reprobó esta sumativa.");
+
+  const top = topWithTies(graded, CONFIG.TOP_N).sort((a, b) => b.grade - a.grade || byName(a, b));
+  const topTable = h("div", { class: "table-wrap" }, h("table", { class: "data" },
+    h("thead", {}, h("tr", {}, h("th", { scope: "col", class: "num" }, "Lugar"), h("th", { scope: "col" }, "Estudiante"), h("th", { scope: "col", class: "num" }, "Nota"))),
+    h("tbody", {}, top.map((e) => h("tr", {},
+      h("td", { class: "num" }, `${1 + graded.filter((other) => other.grade > e.grade).length}°`),
+      h("td", {}, studentLink(e.row.student), pieTag(e.row.student)),
+      h("td", { class: "num" }, formatGrade(e.grade)))))));
+
+  const questions = DATA.questionsByEvaluation.get(selected.id) || [];
+  const answers = DATA.answersByEvaluation.get(selected.id) || [];
+  const questionRows = questions
+    .map((question) => ({ question, ...questionStats(question, answers) }))
+    .sort((a, b) => a.hits - b.hits || a.question.number - b.question.number);
+  const criticalCount = questionRows.filter((q) => q.critical).length;
+  const questionTable = h("div", { class: "table-wrap" }, h("table", { class: "data" },
+    h("caption", { class: "sr-only" }, "Preguntas ordenadas de menor a mayor % de acierto"),
+    h("thead", {}, h("tr", {}, h("th", { scope: "col" }, "Pregunta"), h("th", { scope: "col" }, "OA"),
+      h("th", { scope: "col" }, "% de acierto del curso"), h("th", { scope: "col" }, "Estado"))),
+    h("tbody", {}, questionRows.map(({ question, hits, total, critical }) => h("tr", {},
+      h("td", {}, `P${question.number}`),
+      h("td", {}, question.objective, skillTag(question.objective)),
+      h("td", {}, bar(hits, total, achievementLevel(hits, total), `Pregunta ${question.number}`)),
+      h("td", {}, critical ? h("span", { class: "tag tag-critical" }, "Crítica") : h("span", { class: "muted" }, "—")))))));
+
+  return [
+    selector,
+    title,
+    overview,
+    h("div", { class: "grid-2" },
+      panel("Distribución de notas", distributionChart),
+      panel("Logro del curso por OA", objectiveBars)),
+    h("div", { class: "grid-2" },
+      panel(`Reprobados (${failed.length})`, failedTable),
+      panel(`Mejores resultados (top ${CONFIG.TOP_N}, con empates)`, topTable)),
+    panel(`Preguntas con menor logro · ${criticalCount} críticas (bajo ${CONFIG.CRITICAL_QUESTION_PERCENT}% de acierto)`,
+      h("p", { class: "muted small" }, "Preguntas de ejemplo: simuladas para el mock up a partir de los puntajes por OA de la planilla."),
+      questionTable),
+  ];
+}
+
+// --- Avance curricular (HU-17 a HU-19, HU-21) ---
+
+function renderCurriculum(model) {
+  const ref = CONFIG.REFERENCE_DATE;
+  const coverage = coverageSummary();
+  const items = coverage.items.map(({ objective, coverage: objectiveState }) => {
+    const measuring = DATA.evaluations.filter((e) => e.date <= ref && e.objectives.some((o) => o.code === objective.code));
+    const pooled = pooledAchievement(model.rows.map((row) => yearObjectiveAchievement(row.records, objective.code, ref)));
+    const open = state.openObjective === objective.code;
+    const detailId = `detail-${objective.code.replace(/\W+/g, "-")}`;
+    const canSuggest = pooled && pooled.level !== "adequate" && ACTIVITY_PREVIEWS[objective.code];
+    return h("li", { class: "objective" },
+      h("div", { class: "objective-head" },
+        h("span", { class: `coverage coverage-${objectiveState}` },
+          h("span", { "aria-hidden": "true" }, `${COVERAGE_ICON[objectiveState]} `), COVERAGE_LABEL[objectiveState]),
+        h("strong", {}, objective.code),
+        h("span", { class: "muted small" }, measuring.length ? `Medido en ${measuring.map((e) => e.id).join(", ")}` : "Sin evaluaciones"),
+        pooled ? bar(pooled.score, pooled.maxScore, pooled.level, `Logro del curso en ${objective.code}`) : h("span", { class: "muted" }, "Sin logro registrado"),
+        h("div", { class: "objective-actions" },
+          h("button", {
+            type: "button",
+            class: "secondary",
+            "data-focus": `detail-${objective.code}`,
+            "aria-expanded": String(open),
+            "aria-controls": detailId,
+            onclick: () => { state.openObjective = open ? null : objective.code; render(); },
+          }, open ? "Ocultar detalle" : "Ver detalle"),
+          canSuggest ? h("button", { type: "button", class: "secondary", onclick: () => openActivities(objective, pooled) }, "Sugerir actividades") : null)),
+      open ? h("div", { class: "objective-detail", id: detailId },
+        h("p", {}, objective.text),
+        measuring.length
+          ? h("ul", {}, measuring.map((e) => h("li", {}, `${formatDate(e.date)} · ${e.id} `, typeTag(e.type), ` ${e.name}`)))
+          : h("p", { class: "muted" }, "Este OA aún no se mide en ninguna evaluación.")) : null);
+  });
+
+  return [
+    h("div", { class: "cards" },
+      card("OA de conocimiento cubiertos", `${coverage.covered} de ${coverage.items.length}`, "Cubierto: medido en al menos una sumativa"),
+      card("Tiempo al cierre", plural(daysToClose(ref), "día", "días"), closingText())),
+    ...coverageAlerts(),
+    panel("OA de conocimiento del año · Química 1° medio",
+      h("p", { class: "muted small" }, "La barra muestra el logro acumulado del curso en el año. Las habilidades (OAH) no cuentan en la cobertura."),
+      h("ul", { class: "objectives" }, items)),
+    panel("Línea de tiempo de evaluaciones", renderTimeline()),
+  ];
+}
+
+function evaluationMarker(type, x, y, size) {
+  if (type === EVALUATION_TYPE.DIAGNOSTIC) {
+    return svgNode("rect", { class: "marker-diagnostic", x: x - size, y: y - size, width: 2 * size, height: 2 * size });
+  }
+  if (type === EVALUATION_TYPE.SUMMATIVE) {
+    return svgNode("polygon", { class: "marker-summative", points: `${x},${y - size - 2} ${x + size + 2},${y} ${x},${y + size + 2} ${x - size - 2},${y}` });
+  }
+  return svgNode("circle", { class: "marker-formative", cx: x, cy: y, r: size });
+}
+
+function renderTimeline() {
+  const ref = CONFIG.REFERENCE_DATE;
+  const year = referenceYear();
+  const start = `${year}-03-01`;
+  const end = `${year}-12-31`;
+  const width = 1000;
+  const height = 150;
+  const left = 20;
+  const right = 20;
+  const axisY = 105;
+  const x = (date) => left + (daysBetween(start, date) / daysBetween(start, end)) * (width - left - right);
+
+  const months = Array.from({ length: 10 }, (_, i) => `${year}-${String(i + 3).padStart(2, "0")}-01`);
+  const closes = [1, 2].map((semester) => ({ semester, date: semesterCloseDate(year, semester) }));
+  const evaluations = DATA.evaluations;
+
+  return [
+    svgNode("svg", {
+      class: "chart",
+      viewBox: `0 0 ${width} ${height}`,
+      role: "img",
+      "aria-label": `Línea de tiempo del año: ${evaluations.length} evaluaciones, cierres de semestre el ` +
+        `${closes.map((c) => formatDate(c.date)).join(" y el ")}, y hoy ${formatDate(ref)}.`,
+    },
+    svgNode("line", { class: "axis", x1: left, x2: width - right, y1: axisY, y2: axisY }),
+    months.map((month) => [
+      svgNode("line", { class: "tick", x1: x(month), x2: x(month), y1: axisY, y2: axisY + 6 }),
+      svgNode("text", { x: x(month) + 4, y: axisY + 22 }, MONTH_SHORT[Number(month.slice(5, 7)) - 1]),
+    ]),
+    closes.map((close) => [
+      svgNode("line", { class: "close-line", x1: x(close.date), x2: x(close.date), y1: 20, y2: axisY + 8 }),
+      svgNode("text", { class: "label-strong", x: x(close.date), y: 14, "text-anchor": "middle" },
+        `Cierre ${close.semester}° sem. ${formatDate(close.date).slice(0, 5)}`),
+    ]),
+    svgNode("line", { class: "today-line", x1: x(ref), x2: x(ref), y1: 36, y2: axisY + 8 }),
+    svgNode("text", { class: "label-strong", x: x(ref), y: 32, "text-anchor": "middle" }, `Hoy ${formatDate(ref).slice(0, 5)}`),
+    evaluations.map((e) => svgNode("g", {},
+      svgNode("title", {}, `${e.id} · ${TYPE_LABEL[e.type]} · ${formatDate(e.date)} · ${e.name}`),
+      evaluationMarker(e.type, x(e.date), axisY, 6),
+      svgNode("text", { class: "label-strong", x: x(e.date), y: axisY - 14, "text-anchor": "middle" }, e.id)))),
+    h("div", { class: "type-legend" }, ["diagnostic", "formative", "summative"].map((type) => typeTag(type)),
+      h("span", { class: "muted" }, "Línea punteada: cierre de semestre · Línea azul: hoy")),
+  ];
+}
+
+function openActivities(objective, pooled) {
+  const dialog = document.getElementById("preview-dialog");
+  const percent = formatPercent(pooled.score / pooled.maxScore);
+  dialog.replaceChildren(h("div", { class: "dialog-body" },
+    h("div", { class: "drawer-head" },
+      h("div", {},
+        h("h2", { id: "preview-dialog-title" }, `Ideas de actividades · ${objective.code}`),
+        h("p", {}, h("span", { class: "tag tag-preview" }, "Vista previa"), h("span", { class: "muted" }, ` Logro del curso: ${percent} (${LEVEL_LABEL[pooled.level]})`))),
+      h("button", { type: "button", class: "secondary", onclick: () => dialog.close() }, "Cerrar")),
+    h("ol", { class: "activities" }, ACTIVITY_PREVIEWS[objective.code].map(([title, description]) =>
+      h("li", {}, h("strong", {}, title), h("br"), description))),
+    h("p", { class: "muted small" },
+      "Ejemplos escritos a mano para la maqueta. En la versión futura las sugerirá una IA que solo recibirá datos agregados y anónimos, " +
+      `por ejemplo: "${objective.code}, ${percent} de logro del curso". Nunca nombres ni resultados individuales.`)));
+  dialog.showModal();
+}
+
+// --- Mi semana (HU-22, maqueta) ---
+
+function renderWeek() {
+  const ref = CONFIG.REFERENCE_DATE;
+  const start = WEEK_STARTS[state.weekIndex];
+  const days = WEEKDAY_SHORT.map((label, i) => ({ label, date: addDays(start, i) }));
+  const navButton = (label, delta, disabled) => h("button", {
+    type: "button",
+    class: "secondary",
+    "data-focus": `week-${delta}`,
+    disabled,
+    onclick: () => { state.weekIndex += delta; render(); },
+  }, label);
+
+  return [
+    h("p", { class: "notice notice-preview" }, h("strong", {}, "Próximamente. "),
+      "Calendario de ejemplo con evaluaciones ficticias de tus cursos. Muestra solo evaluaciones: no incluye actividades, reuniones ni entrevistas."),
+    h("div", { class: "week-nav" },
+      navButton("← Semana anterior", -1, state.weekIndex === 0),
+      h("h2", {}, `Semana del ${formatDate(days[0].date)} al ${formatDate(days[4].date)}`),
+      navButton("Semana siguiente →", 1, state.weekIndex === WEEK_STARTS.length - 1)),
+    h("div", { class: "week" }, days.map(({ label, date }) => {
+      const events = WEEK_EXAMPLES.filter((e) => e.date === date);
+      const closeSemester = [1, 2].find((semester) => semesterCloseDate(referenceYear(), semester) === date);
+      return h("section", { class: `day${date === ref ? " today" : ""}`, "aria-label": `${label} ${formatDate(date)}` },
+        h("h3", {}, `${label} ${formatDate(date).slice(0, 5)}`, date === ref ? h("span", { class: "muted small" }, " · hoy") : null),
+        closeSemester ? h("div", { class: "close-marker" }, `Cierre de calificaciones del ${semesterLabel(closeSemester)}`) : null,
+        events.length
+          ? events.map((e) => h("div", { class: `event event-${e.type}` },
+            h("div", {}, typeTag(e.type)),
+            h("strong", {}, e.course),
+            h("span", {}, e.name),
+            h("span", { class: "muted small" }, e.objectives.join(", "))))
+          : h("span", { class: "muted small" }, "Sin evaluaciones"));
+    })),
+  ];
+}
+
+// --- Ficha del estudiante (HU-20) ---
+
+function renderProgressChart(records) {
+  const width = 640;
+  const height = 230;
+  const left = 46;
+  const right = 16;
+  const top = 18;
+  const bottom = 40;
+  const plotWidth = width - left - right;
+  const plotHeight = height - top - bottom;
+  const x = (i) => left + (records.length === 1 ? plotWidth / 2 : (i * plotWidth) / (records.length - 1));
+  const y = (percent) => top + (1 - percent / 100) * plotHeight;
+  const points = records
+    .map((record, i) => ({ record, i, percent: record.absent ? null : (100 * record.score) / record.maxScore }))
+    .filter((p) => p.percent !== null);
+
+  return svgNode("svg", {
+    class: "chart",
+    viewBox: `0 0 ${width} ${height}`,
+    role: "img",
+    "aria-label": "Evolución del % de logro por evaluación: " +
+      records.map((r) => `${r.evaluationId} ${r.absent ? "ausente" : formatPercent(r.score / r.maxScore)}`).join(", "),
+  },
+  [0, 50, 100].map((percent) => [
+    svgNode("line", { class: "gridline", x1: left, x2: width - right, y1: y(percent), y2: y(percent) }),
+    svgNode("text", { x: left - 8, y: y(percent) + 4, "text-anchor": "end" }, `${percent}%`),
+  ]),
+  svgNode("line", { class: "threshold", x1: left, x2: width - right, y1: y(CONFIG.PASSING_PERCENT), y2: y(CONFIG.PASSING_PERCENT) }),
+  svgNode("text", { x: left + 6, y: y(CONFIG.PASSING_PERCENT) + 16 },
+    `${CONFIG.PASSING_PERCENT}% = ${formatGrade(CONFIG.PASSING_GRADE)}`),
+  svgNode("polyline", { class: "line", points: points.map((p) => `${x(p.i)},${y(p.percent)}`).join(" ") }),
+  points.map((p) => svgNode("g", {},
+    svgNode("title", {}, `${p.record.evaluationId}: ${formatPercent(p.percent / 100)}`),
+    svgNode("circle", { class: "point", cx: x(p.i), cy: y(p.percent), r: 4 }),
+    svgNode("text", { class: "label-strong", x: x(p.i), y: y(p.percent) - 10, "text-anchor": "middle" }, `${Math.round(p.percent)}%`))),
+  records.map((record, i) => svgNode("text", { x: x(i), y: height - 20, "text-anchor": "middle" }, record.evaluationId)),
+  records.map((record, i) => (record.absent
+    ? svgNode("text", { x: x(i), y: height - 4, "text-anchor": "middle" }, "Ausente")
+    : null)));
+}
+
+function renderStudentDetail(studentId) {
+  const ref = CONFIG.REFERENCE_DATE;
+  const model = buildModel(state.semester);
+  const row = model.rowById.get(studentId);
+  const { student, records, risk } = row;
+  const close = () => document.getElementById("student-dialog").close();
+
+  const evaluationsTable = h("div", { class: "table-wrap" }, h("table", { class: "data" },
+    h("thead", {}, h("tr", {}, ["Fecha", "Evaluación", "Tipo", "Nota", "% de logro", "Nivel"]
+      .map((title, i) => h("th", { scope: "col", class: i === 3 || i === 4 ? "num" : null }, title)))),
+    h("tbody", {}, records.filter((r) => r.date <= ref).map((record) => {
+      const evaluation = DATA.evaluationById.get(record.evaluationId);
+      return h("tr", {},
+        h("td", {}, formatDate(record.date)),
+        h("td", {}, `${record.evaluationId} · ${evaluation.name}`,
+          record.type === EVALUATION_TYPE.DIAGNOSTIC ? h("span", { class: "muted small" }, " (diagnóstico, no pesa)") : null),
+        h("td", {}, typeTag(record.type)),
+        h("td", { class: "num" }, formatRecordGrade(record)),
+        h("td", { class: "num" }, record.absent ? "—" : formatPercent(record.score / record.maxScore)),
+        h("td", {}, record.absent ? "—" : levelTag(achievementLevel(record.score, record.maxScore))));
+    }))));
+
+  const objectiveComparison = h("div", { class: "compare" }, knowledgeObjectives().map((objective) => {
+    const own = yearObjectiveAchievement(records, objective.code, ref);
+    const course = pooledAchievement(model.rows.map((r) => yearObjectiveAchievement(r.records, objective.code, ref)));
+    if (own.state === "notEvaluated") {
+      return [h("strong", {}, objective.code), h("span", { class: "muted" }, "Sin evaluar en el año")];
+    }
+    return [
+      h("strong", {}, objective.code),
+      h("div", {},
+        own.state === "measured" ? bar(own.score, own.maxScore, own.level, `${student.name} en ${objective.code}`) : h("span", { class: "muted" }, "Ausente"),
+        h("span", { class: "muted small" }, "Estudiante"),
+        course ? bar(course.score, course.maxScore, course.level, `Curso en ${objective.code}`) : null,
+        h("span", { class: "muted small" }, "Curso")),
+    ];
+  }));
+
+  return [h("div", { class: "dialog-body" },
+    h("div", { class: "drawer-head" },
+      h("div", {},
+        h("h2", { id: "student-dialog-title" }, student.name, pieTag(student)),
+        h("p", { class: "muted" }, `${DATA.meta.course} · ${DATA.meta.subject} ${DATA.meta.year}`)),
+      h("button", { type: "button", class: "secondary", onclick: close }, "Cerrar")),
+    h("section", {},
+      h("h3", {}, `Semáforo · ${semesterLabel(model.semester)}`),
+      riskBadge(risk.status),
+      risk.closed ? h("span", { class: "muted small" }, ` Estado al cierre (${formatDate(risk.cutoffDate)})`) : null,
+      risk.reasons.length
+        ? h("ul", { class: "reasons" }, risk.reasons.map((reason) => h("li", {}, describeReason(reason))))
+        : h("p", { class: "muted" }, "Sin alertas.")),
+    h("div", { class: "cards cards-compact" },
+      card("Diagnóstico", formatGrade(row.baseline), "No pesa en los promedios"),
+      card("1° semestre", formatGrade(semesterAverage(records, 1, ref))),
+      card("2° semestre", formatGrade(semesterAverage(records, 2, ref)), semesterOf(ref) === 2 ? "En curso" : null),
+      card("Anual", formatGrade(row.annual.grade), row.annual.partial ? "Parcial" : null)),
+    h("section", {}, h("h3", {}, "Evolución del % de logro"), renderProgressChart(records.filter((r) => r.date <= ref))),
+    h("section", {}, h("h3", {}, "Logro por OA en el año, comparado con el curso"), objectiveComparison),
+    h("section", {}, h("h3", {}, "Evaluaciones"), evaluationsTable))];
+}
+
+function openStudent(studentId) {
+  const dialog = document.getElementById("student-dialog");
+  dialog.replaceChildren(...renderStudentDetail(studentId));
+  if (!dialog.open) dialog.showModal();
+  dialog.scrollTop = 0;
+}
+
+// --- Navegación ---
+
+function renderTabs() {
+  const onKey = (event) => {
+    const index = TABS.findIndex((tab) => tab.id === state.tab);
+    const next = { ArrowRight: index + 1, ArrowLeft: index - 1, Home: 0, End: TABS.length - 1 }[event.key];
+    if (next === undefined) return;
+    event.preventDefault();
+    goTo(TABS[(next + TABS.length) % TABS.length].id);
+  };
+  document.getElementById("tabs").replaceChildren(...TABS.map((tab) => h("button", {
+    type: "button",
+    role: "tab",
+    id: `tab-${tab.id}`,
+    "aria-selected": String(tab.id === state.tab),
+    "aria-controls": "tab-panel",
+    tabindex: tab.id === state.tab ? "0" : "-1",
+    onclick: () => goTo(tab.id),
+    onkeydown: onKey,
+  }, tab.label)));
+}
+
+function render() {
+  const focusKey = document.activeElement?.dataset?.focus;
+  const model = buildModel(state.semester);
+  renderTabs();
+  const tabPanel = document.getElementById("tab-panel");
+  tabPanel.setAttribute("aria-labelledby", `tab-${state.tab}`);
+  tabPanel.replaceChildren(...[TABS.find((tab) => tab.id === state.tab).render(model)].flat().filter(Boolean));
+  if (focusKey) document.querySelector(`[data-focus="${CSS.escape(focusKey)}"]`)?.focus();
+}
+
+function goTo(tab, options = {}) {
+  Object.assign(state, options);
+  state.tab = tab;
+  history.replaceState(null, "", `#${tab}`);
+  render();
+  document.getElementById(`tab-${tab}`).focus();
+}
+
+function init() {
+  DATA = loadData();
+  const ref = CONFIG.REFERENCE_DATE;
+  document.getElementById("reference-date").textContent = `Datos de ejemplo al ${formatDate(ref)}`;
+  document.getElementById("course-select").replaceChildren(h("option", {}, `${DATA.meta.course} · ${DATA.meta.subject}`));
+
+  const semesterSelect = document.getElementById("semester-select");
+  semesterSelect.value = String(state.semester);
+  semesterSelect.addEventListener("change", (event) => {
+    state.semester = Number(event.target.value);
+    state.summativeId = null;
+    render();
+  });
+
+  for (const dialog of document.querySelectorAll("dialog")) {
+    dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.close(); });
+  }
+
+  const currentWeek = WEEK_STARTS.findIndex((weekStart) => ref >= weekStart && ref <= addDays(weekStart, 4));
+  state.weekIndex = Math.max(0, currentWeek);
+  // La pestaña puede venir en la dirección (#heatmap), para enlazarla o capturarla. Nunca datos de estudiantes.
+  const tabFromHash = location.hash.slice(1);
+  if (TABS.some((tab) => tab.id === tabFromHash)) state.tab = tabFromHash;
+  render();
+}
+
+// === Verificación ===
+// Se activa con ?verificar (plan §10.1). Cada caso compara el valor obtenido con el esperado.
+
+function runChecks(data) {
+  const checks = [];
+  let group = "";
+  const section = (name) => { group = name; };
+  const check = (name, actual, expected) => {
+    const ok = JSON.stringify(actual) === JSON.stringify(expected);
+    checks.push({ group, name, ok, actual, expected });
+  };
+
+  const ref = CONFIG.REFERENCE_DATE;
+  const records = new Map(data.students.map((s) => [s.id, studentRecords(data, s.id)]));
+  const ids = data.students.map((s) => s.id);
+  const gradesOf = (id) => Object.fromEntries(records.get(id).map((r) => [r.evaluationId, recordGrade(r)]));
+
+  // Registros sintéticos para los casos del semáforo.
+  const rec = (evaluationId, type, date, score, maxScore, options = {}) => ({
+    evaluationId, type, date, weight: options.weight ?? null, score: options.absent ? null : score, maxScore,
+    absent: Boolean(options.absent),
+    objectives: [{ code: options.code ?? "CN1M OA 20", kind: "knowledge", score, maxScore, absent: Boolean(options.absent) }],
+  });
+  const F = EVALUATION_TYPE.FORMATIVE;
+  const S = EVALUATION_TYPE.SUMMATIVE;
+  const statusOf = (rs, semester = 2) => riskStatus(rs, semester, ref);
+  const signalsOf = (rs, semester = 2) => statusOf(rs, semester).reasons.map((r) => r.signal);
+
+  section("Nota (Constitución 6.1)");
+  check("0% → 1,0", scoreToGrade(0, 10), 10);
+  check("30% → 2,5", scoreToGrade(3, 10), 25);
+  check("60% → 4,0", scoreToGrade(6, 10), 40);
+  check("80% → 5,5", scoreToGrade(8, 10), 55);
+  check("100% → 7,0", scoreToGrade(10, 10), 70);
+
+  section("Nivel de logro (Constitución 6.2)");
+  check("59,9% → Insuficiente", achievementLevel(599, 1000), "insufficient");
+  check("60% → Elemental", achievementLevel(6, 10), "elemental");
+  check("79,9% → Elemental", achievementLevel(799, 1000), "elemental");
+  check("80% → Adecuado", achievementLevel(8, 10), "adequate");
+
+  section("Calendario (Constitución 6.4)");
+  check("30-06 → 1° semestre", semesterOf("2026-06-30"), 1);
+  check("01-07 → 2° semestre", semesterOf("2026-07-01"), 2);
+  check("Días al cierre al 27-10-2026 = 37", daysToClose(ref), 37);
+  check("Semestre de cada evaluación (D1, F1, F2, S1, F3 en el 1°; S2, F4, F5, S3 en el 2°)",
+    data.evaluations.map((e) => `${e.id}:${semesterOf(e.date)}`).join(" "),
+    "D1:1 F1:1 F2:1 S1:1 F3:1 S2:2 F4:2 F5:2 S3:2");
+  check("Ventana de 2 meses al 27-10-2026 empieza el 27-08-2026", recentWindowStart(ref), "2026-08-27");
+  check("Ventana: 27-08 entra", "2026-08-27" >= recentWindowStart(ref), true);
+  check("Ventana: 26-08 no entra", "2026-08-26" >= recentWindowStart(ref), false);
+  check("Restar meses a fin de mes: 30-04 − 2 meses → 28-02", subtractMonths("2026-04-30", 2), "2026-02-28");
+
+  section("Nota por evaluación y ausentes (Constitución 6.1)");
+  const expectedByEvaluation = {
+    D1: [39, 19, 35], F1: [47, 3, 33], F2: [41, 12, 33], S1: [46, 10, 35], F3: [41, 15, 33],
+    S2: [41, 18, 35], F4: [40, 13, 34], F5: [55, 3, 34], S3: [49, 7, 35],
+  };
+  for (const evaluation of data.evaluations) {
+    const grades = ids.map((id) => gradesOf(id)[evaluation.id]).filter((g) => g !== null);
+    check(`${evaluation.id}: promedio del curso, bajo 4,0 y rindieron`,
+      [simpleAverage(grades), grades.filter((g) => g < CONFIG.PASSING_GRADE).length, grades.length],
+      expectedByEvaluation[evaluation.id]);
+  }
+  const e05F2 = records.get("E05").find((r) => r.evaluationId === "F2");
+  check("F2 de E05 → Ausente, sin nota", [recordGrade(e05F2), formatRecordGrade(e05F2)], [null, "Ausente"]);
+
+  section("Promedios (Constitución 6.1)");
+  check("Sumativas 4,0 y 4,4 con pesos 30 y 35 → 4,2", weightedAverage([{ grade: 40, weight: 30 }, { grade: 44, weight: 35 }]), 42);
+  check("E05, 2° semestre: (4,0 + 4,8 + 4,2) / 3 → 4,3", semesterAverage(records.get("E05"), 2, ref), 43);
+  check("E05, 1° semestre: (3,5 + 3,0 + 3,4) / 3 → 3,3 (F2 Ausente y D1 no pesan)", semesterAverage(records.get("E05"), 1, ref), 33);
+  check("Anual: 3,4 y 4,2 → 3,8", combineAnnual(34, 42), 38);
+  check("Anual: 3,9 y 4,0 → 4,0", combineAnnual(39, 40), 40);
+  check("Anual con un solo semestre con notas → ese semestre", combineAnnual(null, 45), 45);
+  check("Semestre sin notas → Sin notas", formatGrade(semesterAverage([], 2, ref)), "Sin notas");
+  check("Una diagnóstica sola no genera promedio",
+    semesterAverage([rec("D9", EVALUATION_TYPE.DIAGNOSTIC, "2026-08-01", 2, 10)], 2, ref), null);
+  check("Anual al 27-10-2026 es parcial", annualAverage(records.get("E05"), ref).partial, true);
+  const fiveSeven = { E05: [29, 33, 43, 38], E18: [42, 46, 37, 42], E22: [33, 33, 41, 37], E30: [49, 49, 37, 43] };
+  for (const [id, expected] of Object.entries(fiveSeven)) {
+    const rs = records.get(id);
+    check(`${id}: diagnóstico, 1° semestre, 2° semestre y anual`,
+      [baseline(rs), semesterAverage(rs, 1, ref), semesterAverage(rs, 2, ref), annualAverage(rs, ref).grade], expected);
+  }
+  const courseAverage = (fn) => simpleAverage(ids.map((id) => fn(records.get(id))));
+  check("Promedio del curso: 1° semestre 4,4", courseAverage((rs) => semesterAverage(rs, 1, ref)), 44);
+  check("Promedio del curso: 2° semestre 4,7", courseAverage((rs) => semesterAverage(rs, 2, ref)), 47);
+  check("Promedio del curso: anual 4,6", courseAverage((rs) => annualAverage(rs, ref).grade), 46);
+  check("Bajo 4,0 en el anual (8)",
+    ids.filter((id) => annualAverage(records.get(id), ref).grade < CONFIG.PASSING_GRADE),
+    ["E05", "E07", "E09", "E17", "E22", "E31", "E32", "E33"]);
+
+  section("Semáforo (Constitución 6.3)");
+  check("2° semestre: 9 en rojo",
+    ids.filter((id) => riskStatus(records.get(id), 2, ref).status === "red"),
+    ["E07", "E09", "E17", "E18", "E21", "E30", "E31", "E32", "E33"]);
+  check("E30 (anual 4,3, semestre 3,7) en rojo", riskStatus(records.get("E30"), 2, ref).status, "red");
+  check("Rojo: motivo en texto", describeReason(riskStatus(records.get("E30"), 2, ref).reasons[0]), "Promedio semestral 3,7 (bajo 4,0)");
+  // Formativas al 70% (4,8) y sumativa al 55% (3,8): baja menos de 20 puntos y el promedio queda en 4,5.
+  const caseA = [rec("F6", F, "2026-07-10", 7, 10), rec("F7", F, "2026-07-20", 7, 10), rec("S9", S, "2026-09-01", 11, 20, { weight: 30 })];
+  check("(a) Última sumativa bajo 4,0, sin rojo", [statusOf(caseA).status, signalsOf(caseA)], ["yellow", ["lastSummative"]]);
+  const caseB = [rec("F6", F, "2026-09-01", 5, 10), rec("F7", F, "2026-10-01", 5, 10, { code: "CN1M OA 18" }), rec("S9", S, "2026-10-10", 20, 20, { weight: 30 })];
+  check("(b) 2 formativas Insuficiente en 2 meses", [statusOf(caseB).status, signalsOf(caseB)], ["yellow", ["recentFails"]]);
+  check("(b) Motivo en texto", describeReason(statusOf(caseB).reasons[0]),
+    "2 formativas Insuficiente en los últimos 2 meses (CN1M OA 20, CN1M OA 18)");
+  const caseBOutside = [rec("F6", F, "2026-08-26", 5, 10), rec("F7", F, "2026-10-01", 5, 10), rec("S9", S, "2026-10-10", 20, 20, { weight: 30 })];
+  check("(b) Una formativa del 26-08 queda fuera de la ventana", signalsOf(caseBOutside), []);
+  const caseC = [rec("F6", F, "2026-07-10", 9, 10), rec("F7", F, "2026-08-10", 6, 10)];
+  check("(c) Caída de 30 puntos dentro del semestre", [statusOf(caseC).status, signalsOf(caseC)], ["yellow", ["drop"]]);
+  const caseCCross = [rec("F6", F, "2026-06-10", 9, 10), rec("S9", S, "2026-07-05", 13, 20, { weight: 30 })];
+  check("(c) Caída que cruza el cambio de semestre (F 1° → S 2°)", signalsOf(caseCCross), ["drop"]);
+  const caseD = [rec("F6", F, "2026-08-01", 0, 10, { absent: true }), rec("F7", F, "2026-09-01", 0, 10, { absent: true }), rec("F8", F, "2026-09-15", 8, 10)];
+  check("(d) 2 ausencias en el semestre", [statusOf(caseD).status, signalsOf(caseD)], ["yellow", ["absences"]]);
+  check("Verde: sin señales", statusOf([rec("F6", F, "2026-08-01", 8, 10), rec("S9", S, "2026-09-01", 17, 20, { weight: 30 })]).status, "green");
+  check("Semestre sin notas: nadie en rojo", statusOf([]).status, "green");
+  check("Semestre cerrado: el 1° se evalúa al 30-06 (D6)",
+    (({ closed, cutoffDate }) => [closed, cutoffDate])(riskStatus(records.get("E05"), 1, ref)), [true, "2026-06-30"]);
+  check("Los registros no traen datos personales (PIE, nombre, género)",
+    Object.keys(records.get("E01")[0]).some((key) => ["pie", "name", "gender"].includes(key)), false);
+
+  const statusCounts = (semester) => ["red", "yellow", "green"]
+    .map((status) => ids.filter((id) => riskStatus(records.get(id), semester, ref).status === status).length);
+  check("2° semestre al 27-10-2026: 9 🔴 · 5 🟡 · 21 🟢 (validado por el PO)", statusCounts(2), [9, 5, 21]);
+  check("1° semestre al cierre: 9 🔴 · 13 🟡 · 13 🟢 (validado por el PO)", statusCounts(1), [9, 13, 13]);
+  check("2° semestre: estudiantes en 🟡",
+    ids.filter((id) => riskStatus(records.get(id), 2, ref).status === "yellow"), ["E01", "E15", "E22", "E25", "E34"]);
+
+  section("Cobertura curricular (Constitución 6.4)");
+  const knowledge = data.objectives.filter((o) => o.kind === "knowledge");
+  check("Estado de CN1M OA 17–20",
+    knowledge.map((o) => `${o.code}: ${objectiveCoverage(data.evaluations, o.code, ref)}`),
+    ["CN1M OA 17: covered", "CN1M OA 18: covered", "CN1M OA 19: notEvaluated", "CN1M OA 20: covered"]);
+  check("3 de 4 OA cubiertos",
+    `${knowledge.filter((o) => objectiveCoverage(data.evaluations, o.code, ref) === "covered").length} de ${knowledge.length}`, "3 de 4");
+  check("Las habilidades no cuentan como OA de conocimiento", knowledge.some((o) => o.code.includes("OAH")), false);
+  check("Mapa del 2° semestre para E01: OA 17 y 18 no evaluados en el semestre; OA 19 sin evaluar; OA 20 medido",
+    knowledge.map((o) => objectiveAchievement(records.get("E01"), o.code, 2, ref).state),
+    ["notInSemester", "notInSemester", "notEvaluated", "measured"]);
+
+  check("Alerta de OA pendientes activa al 27-10-2026 (37 ≤ 45 días)", coverageAlertActive(ref), true);
+  check("Alerta de OA pendientes inactiva al 01-10-2026 (63 días)", coverageAlertActive("2026-10-01"), false);
+  check("Logro anual de E05 en CN1M OA 19 → sin evaluar", yearObjectiveAchievement(records.get("E05"), "CN1M OA 19", ref).state, "notEvaluated");
+
+  section("Análisis de sumativas (HU-12 a HU-15)");
+  const s1Grades = ids.map((id) => gradesOf(id).S1).filter((g) => g !== null);
+  check("S1: los tramos suman 35 y el primero (1,0–3,9) tiene a los 10 reprobados",
+    (([first, ...rest]) => [first.count, first.count + rest.reduce((sum, b) => sum + b.count, 0)])(gradeDistribution(s1Grades)), [10, 35]);
+  check("Top 5 con empates: 7,0 · 6,5 · 6,5 · 6,0 · 6,0 · 6,0 · 5,0 → 6 estudiantes",
+    topWithTies([70, 65, 65, 60, 60, 60, 50].map((grade) => ({ grade })), 5).length, 6);
+  check("Pregunta con 50% de acierto no es crítica; con 40% sí",
+    [questionStats({ number: 1 }, ["1", "1", "1", "1", "1", "0", "0", "0", "0", "0"].map((c) => ({ correct: c }))).critical,
+      questionStats({ number: 1 }, ["1", "1", "1", "1", "0", "0", "0", "0", "0", "0"].map((c) => ({ correct: c }))).critical],
+    [false, true]);
+
+  section("Formato es-CL (Constitución 6.5)");
+  check("4,6", formatGrade(46), "4,6");
+  check("62,5%", formatPercent(0.625), "62,5%");
+  check("27-10-2026", formatDate("2026-10-27"), "27-10-2026");
+  check("Sin nota → Sin notas", formatGrade(null), "Sin notas");
+
+  section("Preguntas simuladas (plan §7)");
+  let mismatches = 0;
+  for (const answer of data.answers) {
+    const questions = data.questionsByEvaluation.get(answer.evaluationId);
+    for (const result of data.resultsByEvaluation.get(answer.evaluationId).filter((r) => r.studentId === answer.studentId)) {
+      const hits = questions.filter((q) => q.objective === result.objective && answer.correct[q.number - 1] === "1").length;
+      if (hits !== result.score) mismatches++;
+    }
+  }
+  check("Aciertos por estudiante y OA = puntaje de la planilla (S1, S2, S3)", mismatches, 0);
+
+  return checks;
+}
+
+function renderChecks(checks) {
+  const failed = checks.filter((c) => !c.ok);
+  const container = document.createElement("section");
+  container.className = "checks";
+  container.setAttribute("aria-label", "Verificación");
+
+  const title = document.createElement("h2");
+  title.textContent = "Verificación (?verificar)";
+  const summary = document.createElement("p");
+  summary.className = `summary ${failed.length ? "fail" : "ok"}`;
+  summary.textContent = failed.length
+    ? `❌ ${failed.length} de ${checks.length} casos fallan`
+    : `✅ ${checks.length} de ${checks.length} casos correctos`;
+
+  const table = document.createElement("table");
+  table.innerHTML = "<thead><tr><th>Resultado</th><th>Caso</th><th>Obtenido</th><th>Esperado</th></tr></thead>";
+  const body = document.createElement("tbody");
+  let currentGroup = null;
+  for (const c of checks) {
+    if (c.group !== currentGroup) {
+      currentGroup = c.group;
+      const row = body.insertRow();
+      row.className = "group";
+      const cell = row.insertCell();
+      cell.colSpan = 4;
+      cell.textContent = c.group;
+    }
+    const row = body.insertRow();
+    const result = row.insertCell();
+    result.className = c.ok ? "result-ok" : "result-fail";
+    result.textContent = c.ok ? "✅ Correcto" : "❌ Falla";
+    row.insertCell().textContent = c.name;
+    for (const value of [c.actual, c.expected]) {
+      const code = document.createElement("code");
+      code.textContent = JSON.stringify(value);
+      row.insertCell().append(code);
+    }
+  }
+  table.append(body);
+  container.append(title, summary, table);
+  document.getElementById("app").append(container);
+
+  console.info(summary.textContent);
+  if (failed.length) {
+    console.table(failed.map(({ group, name, actual, expected }) =>
+      ({ group, name, actual: JSON.stringify(actual), expected: JSON.stringify(expected) })));
+  }
+}
+
+// === Inicio ===
+try {
+  init();
+  console.info(`${DATA.students.length} estudiantes · ${DATA.evaluations.length} evaluaciones`);
+  if (new URLSearchParams(location.search).has("verificar")) renderChecks(runChecks(DATA));
+} catch (error) {
+  document.getElementById("tab-panel").replaceChildren(
+    Object.assign(document.createElement("p"), { className: "notice notice-alert", textContent: `Error al cargar el dashboard: ${error.message}` }));
+  console.error(error);
+}
+</script>
+</body>
+</html>

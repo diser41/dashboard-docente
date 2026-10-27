@@ -1,0 +1,10 @@
+# Material de referencia privado: fotos de un curso de terceros y un mensaje de una docente.
+inputs/
+
+# Transcripción de la sesión: incluye el correo de la cuenta y las instrucciones del asistente.
+export/*.zip
+
+# Sistema
+Thumbs.db
+desktop.ini
+.DS_Store
